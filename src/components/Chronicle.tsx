@@ -14,35 +14,35 @@ export const CHRONICLE_STEPS: ChronicleStep[] = [
   {
     id: 'loss',
     title: 'YOUR LOSS',
-    img: '/extracted/step_loss.jpg',
+    img: '/step_loss.jpg',
     description: 'Your item is lost to the vast sea.',
     detailedGuide: 'Whether swept overboard by the Knock Up Stream or misplaced at a bustling Grand Line tavern, your loss is logged into the global repository with coordinates, distinctive markings, and optional Berry bounty rewards.',
   },
   {
     id: 'found',
     title: 'SOMEONE FINDS IT',
-    img: '/extracted/step_found.jpg',
+    img: '/step_found.jpg',
     description: 'Someone discovers the item on a remote island.',
     detailedGuide: 'An islander, local merchant, or friendly pirate spots your belongings washed ashore or secured at an island outpost and brings it to the official town hall or portmaster station.',
   },
   {
     id: 'register',
     title: 'ISLAND REGISTRATION',
-    img: '/extracted/step_register.jpg',
+    img: '/step_register.jpg',
     description: "The item is registered in the island's local registry.",
     detailedGuide: "Local harbor masters stamp and log the artifact into the World Government & Pirate Haven shared ledger, encrypting its unique marks into the Transponder Snail network.",
   },
   {
     id: 'search',
     title: 'YOUR SEARCH BEGINS',
-    img: '/extracted/step_search.jpg',
+    img: '/step_search.jpg',
     description: 'You start a global search for your treasure here.',
     detailedGuide: 'You query the Treasury with keywords, island locations, or unique marks. Our transponder snail matching engine scans registries across all 4 Blues and the Grand Line in real-time.',
   },
   {
     id: 'reclaim',
     title: 'ITEM RECLAIMED',
-    img: '/extracted/step_reclaim.jpg',
+    img: '/step_reclaim.jpg',
     description: 'You come to collect your item.',
     detailedGuide: 'Present your proof of ownership or verification passphrase. Collect your treasure at the designated port or request delivery via Karoo courier bird!',
   },
@@ -53,7 +53,7 @@ export function Chronicle() {
   const [showLaughTale, setShowLaughTale] = useState(false)
 
   return (
-    <section className="relative w-full py-8 px-4 md:px-8 bg-[#0a0604] border-t border-[#4a2e12]/40">
+    <section className="relative w-full py-8 px-4 md:px-8 border-t border-[#4a2e12]/30" style={{ background: 'rgba(4,3,2,0.38)' }}>
       <div className="mx-auto max-w-[1440px]">
         {/* Ornate Header with Laugh Tale badge on the right */}
         <div className="relative flex items-center justify-center mb-6">
