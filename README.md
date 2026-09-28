@@ -194,14 +194,84 @@ Instead of relying on a single property, the system evaluates multiple character
 
 ---
 
-## 🏷️ Category Matching
+## 🏷️ Category Matching (35% Weight)
 
-The system compares the category of the Lost and Found reports.
+The system compares the category of the Lost and Found reports using canonical category mapping:
+- Exact category match receives the full **35 points**.
+- Mismatched categories receive 0 points to filter out false correlations.
 
-An exact category match receives the maximum category score.
+---
 
-For example:
+## 🗺️ Location & Sabaody Grove Proximity (25% Weight)
 
-```text
-Lost:  Electronics
-Found: Electronics
+Unique to our platform, Sabaody Archipelago is subdivided into **79 individual Groves** across 6 thematic zones:
+- Reports in the **exact same grove** receive the full **25 points**.
+- Proximity decay is applied based on absolute grove-distance $|Grove_A - Grove_B|$:
+  - $\le 3$ groves: 20 points
+  - $\le 7$ groves: 15 points
+  - Same Zone: 10 points
+  - Cross-island / different islands: 5 points
+
+---
+
+## 🔤 Keyword & Physical Clues Similarity (25% Weight)
+
+Uses tokenization, stop-word pruning, and **Jaccard Similarity** across title, description, and unique markings:
+- Evaluates lexical and physical attribute overlap.
+- Yields up to **25 points** based on token correlation.
+
+---
+
+## 📅 Date Window Correlation (15% Weight)
+
+Evaluates chronological plausibility between loss and discovery dates:
+- Found item on the same day or within 24 hours: **15 points** (maximum).
+- Exponential/linear decay over a 30-day window.
+- Negative time windows (item claimed found before it was lost) are penalized.
+
+---
+
+# 🌟 Novelty & Unique Value Propositions (USPs)
+
+1. **Internal 79-Grove Proximity Engine**
+   - Unlike generic lost-and-found platforms with flat drop-downs, our engine calculates fine-grained distance metrics across Sabaody's 79 groves and 6 zones (Lawless, Tourist, Marine HQ, Park, Coating, Residential).
+2. **Two-Step Anti-Fraud Verification Challenge**
+   - Prevents fraudulent claims by requiring claimants to answer secret ownership marks and circumstances of loss before dispatching to Marine Admin for cryptographic seal generation.
+3. **One-Click Recovered Stamp & Confetti Audio Celebration**
+   - High-fidelity visual celebratory stamp combined with audio fanfare (`confetti.mp3`) and particle physics upon claim recovery.
+4. **Interactive Grand Line Navigation Map**
+   - Lore-accurate cartographical view of the Paradise Section with live database pin correlation, hot-spot filtering, and zoom inspection.
+5. **Observation Haki 4-Factor Explainable Breakdown**
+   - Transparent, judge-ready UI showing exact weights (`Category 35%`, `Keywords 25%`, `Location 25%`, `Date 15%`) and point contributions.
+
+---
+
+# 🚀 Getting Started
+
+### Prerequisites
+- **Node.js** (v18+)
+- **npm** (v9+)
+
+### Installation
+```bash
+# Clone the repository
+git clone https://github.com/Sid1252-10/Smart-Lost-and-Found-Matching-Platform.git
+cd Smart-Lost-and-Found-Matching-Platform
+
+# Install dependencies
+npm install
+
+# Start local development server
+npm run dev
+```
+
+### Production Build
+```bash
+npm run build
+```
+Optimized with code-splitting (`vendor-react`, `vendor-supabase`, `vendor-icons`, and app chunks) for fast initial paint on Vercel.
+
+---
+
+# 📜 License
+Distributed under the MIT License. Created for the Smart Lost and Found Matching Hackathon / Project Evaluation.

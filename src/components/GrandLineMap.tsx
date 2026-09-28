@@ -175,14 +175,14 @@ export function GrandLineMap({
       )}
 
       {/* Map Viewport Area */}
-      <div className="relative overflow-auto bg-[#1b150c] p-2 sm:p-4 flex items-center justify-center max-h-[520px]">
+      <div className="relative overflow-auto bg-[#050e1c] p-2 sm:p-3 flex items-start justify-center">
         <div
           style={{
             transform: `scale(${scale})`,
-            transformOrigin: 'center center',
+            transformOrigin: 'top center',
             transition: 'transform 0.2s ease-out',
           }}
-          className="relative w-full max-w-[1280px] rounded-lg shadow-2xl overflow-hidden border border-[#8a602a]/60 select-none"
+          className="relative w-full max-w-[1280px] rounded-lg shadow-xl overflow-hidden select-none"
         >
           {/* THE EXACT MAP IMAGE USED IN WORLD */}
           <img

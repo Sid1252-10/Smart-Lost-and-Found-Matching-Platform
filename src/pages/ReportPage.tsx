@@ -192,8 +192,8 @@ export function ReportPage() {
               </span>
             </div>
 
-            {/* The World Map — capped height so it doesn't overflow */}
-            <div className="overflow-hidden rounded-xl" style={{ maxHeight: '420px' }}>
+            {/* The World Map — full display without bottom cropping */}
+            <div className="rounded-xl shadow-xl">
               <GrandLineMap
                 selectedId={locationId}
                 onSelect={setLocationId}
@@ -374,7 +374,7 @@ export function ReportPage() {
                 <div className="flex flex-wrap items-center gap-3">
                   <input
                     type="file"
-                    accept="image/*"
+                    accept="image/jpeg,image/jpg,image/png,image/webp,image/gif,image/bmp"
                     onChange={handleImageUpload}
                     className="rounded-lg border border-slate-700 bg-slate-950/70 px-3 py-1.5 text-xs text-slate-300 file:mr-2 file:rounded file:border-0 file:bg-[#d4a843] file:px-2.5 file:py-0.5 file:text-xs file:font-semibold file:text-black hover:file:brightness-110 cursor-pointer"
                   />
@@ -395,6 +395,9 @@ export function ReportPage() {
                     </div>
                   )}
                 </div>
+                <p className="mt-1.5 text-[10px] text-slate-500 leading-relaxed">
+                  Accepted formats: <span className="text-slate-400 font-semibold">JPG · PNG · WEBP · GIF · BMP</span> — Max size: <span className="text-slate-400 font-semibold">5 MB</span>. Image is auto-compressed to 800px before upload.
+                </p>
               </div>
 
               {/* Description */}

@@ -4,6 +4,7 @@ import { X, ShieldCheck, CheckCircle2, ArrowRight, ArrowLeft, KeyRound, AlertTri
 import { useRegistry } from '../context/RegistryContext'
 import type { RegistryItem } from '../types'
 import { canonicalCategory } from '../lib/categories'
+import { fireTreasureConfetti } from '../lib/confetti'
 
 export interface ClaimVerificationModalProps {
   item: RegistryItem | null
@@ -56,9 +57,11 @@ export function ClaimVerificationModal({ item, isOpen, onClose }: ClaimVerificat
       const fullProof = `[PROOF CHALLENGE] Secret Marks: ${secretMarks} | Loss Context: ${lossContext} | Additional: ${additionalProof} | Courier: ${courierMethod} -> ${deliveryPort}`
       await claimItem(item.id, claimantName, fullProof)
       setSubmittedCode(sealCode)
+      fireTreasureConfetti()
     } catch (err) {
       console.error('Claim verification error:', err)
       setSubmittedCode(sealCode)
+      fireTreasureConfetti()
     } finally {
       setIsSubmitting(false)
     }

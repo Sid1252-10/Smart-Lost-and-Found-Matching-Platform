@@ -125,6 +125,19 @@ export function ClaimingPage() {
           </p>
         </div>
 
+        {/* Admin Approval Notice */}
+        <div className="mb-6 rounded-xl border border-[#d4a843]/50 bg-gradient-to-r from-[#1a1500]/80 via-[#211c00]/80 to-[#1a1500]/80 p-4 flex items-start gap-3 shadow-lg">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#d4a843]/20 border border-[#d4a843]/60 mt-0.5">
+            <ShieldCheck className="h-4 w-4 text-[#f0d060]" />
+          </div>
+          <div>
+            <p className="text-xs font-bold text-[#f0d060] uppercase tracking-widest mb-1">Requires Admin Approval</p>
+            <p className="text-xs text-amber-200/80 leading-relaxed">
+              All ownership claims are reviewed by a Grand Line Registry Administrator before the item is released. You will receive a Royal Treasury Seal Code as confirmation — the Admin Panel will then show your claim under <strong className="text-[#f0d060]">Claims Moderation</strong> and must approve it before the item status changes to <strong className="text-[#f0d060]">RECOVERED</strong>.
+            </p>
+          </div>
+        </div>
+
         {submitted ? (
           <div className="rounded-xl border border-[#d4a843] bg-gradient-to-b from-[#142338] to-[#0a1220] p-8 text-center shadow-2xl">
             <CheckCircle2 className="mx-auto h-16 w-16 text-[#f0d060] mb-4 animate-bounce" />

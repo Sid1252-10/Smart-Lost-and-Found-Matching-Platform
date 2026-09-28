@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, type FormEvent } from 'react'
 import { Navbar } from '../components/Navbar'
 import { Footer } from '../components/Footer'
 import { useRegistry } from '../context/RegistryContext'
@@ -10,6 +10,8 @@ import {
   BarChart3,
   Layers,
   Trash2,
+  PlusCircle,
+  X,
 } from 'lucide-react'
 import { CATEGORIES } from '../data/catalog'
 import { canonicalCategory } from '../lib/categories'
@@ -18,15 +20,23 @@ import { ItemDetailModal } from '../components/Modals'
 import { AdminAuthGate } from '../components/AdminAuthGate'
 import { RecoveredStampCelebration, type RecoveredCelebrationState } from '../components/RecoveredStampCelebration'
 import { fireTreasureConfetti } from '../lib/confetti'
+import { playRecoverySound } from '../lib/recoverySound'
 import type { RegistryItem } from '../types'
 
 export function AdminPage() {
-  const { items, recoverItem, deleteItem } = useRegistry()
+  const { items, recoverItem, deleteItem, addItem } = useRegistry()
   const [activeTab, setActiveTab] = useState<'analytics' | 'reports' | 'claims'>('analytics')
   const [search, setSearch] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [detailItem, setDetailItem] = useState<RegistryItem | null>(null)
+  const [showAddForm, setShowAddForm] = useState(false)
+  const [addFormKind, setAddFormKind] = useState<'lost' | 'found'>('lost')
+  const [addFormTitle, setAddFormTitle] = useState('')
+  const [addFormCategory, setAddFormCategory] = useState(CATEGORIES[0])
+  const [addFormLocation, setAddFormLocation] = useState('Sabaody Archipelago')
+  const [addFormDesc, setAddFormDesc] = useState('')
+  const [addFormSubmitting, setAddFormSubmitting] = useState(false)
   const [celebrationState, setCelebrationState] = useState<RecoveredCelebrationState>({
     isOpen: false,
     title: '',
@@ -70,6 +80,37 @@ export function AdminPage() {
     document.body.appendChild(downloadAnchor)
     downloadAnchor.click()
     downloadAnchor.remove()
+  }
+
+  async function handleAddReport(e: FormEvent) {
+    e.preventDefault()
+    if (!addFormTitle.trim()) return
+    setAddFormSubmitting(true)
+    try {
+      await addItem({
+        id: crypto.randomUUID(),
+        kind: addFormKind,
+        status: addFormKind === 'lost' ? 'REPORTED LOST' : 'FOUND',
+        title: addFormTitle.trim(),
+        category: addFormCategory,
+        location: addFormLocation,
+        locationId: addFormLocation.toLowerCase().replace(/\s+/g, '-'),
+        groveNumber: 1,
+        colour: 'Unknown',
+        uniqueMarks: 'None specified',
+        description: addFormDesc.trim() || `Admin-entered ${addFormKind} report.`,
+        incidentDate: new Date().toISOString().split('T')[0],
+        dateLost: addFormKind === 'lost' ? new Date().toISOString().split('T')[0] : undefined,
+        dateFound: addFormKind === 'found' ? new Date().toISOString().split('T')[0] : undefined,
+      })
+      setAddFormTitle('')
+      setAddFormDesc('')
+      setShowAddForm(false)
+    } catch (err) {
+      console.error('Failed to add report:', err)
+    } finally {
+      setAddFormSubmitting(false)
+    }
   }
 
   return (
@@ -205,6 +246,112 @@ export function AdminPage() {
         {/* Tab 2: Reports Management */}
         {activeTab === 'reports' && (
           <div className="space-y-4">
+            {/* Add New Report Button / Inline Form */}
+            <div className="flex justify-end">
+              <button
+                onClick={() => setShowAddForm((v) => !v)}
+                className="flex items-center gap-2 rounded-lg border border-[#d4a843]/50 bg-[#d4a843]/10 px-4 py-2 text-xs font-bold text-[#f0d060] hover:bg-[#d4a843]/20 transition font-heading"
+              >
+                {showAddForm ? <X className="h-4 w-4" /> : <PlusCircle className="h-4 w-4" />}
+                {showAddForm ? 'Cancel' : 'Add New Report'}
+              </button>
+            </div>
+
+            {/* Inline Add Report Form */}
+            {showAddForm && (
+              <form
+                onSubmit={handleAddReport}
+                className="rounded-xl border border-[#d4a843]/40 bg-gradient-to-b from-[#111d30] to-[#0a1220] p-5 shadow-xl space-y-4"
+              >
+                <div className="flex items-center gap-2 border-b border-[#d4a843]/20 pb-3">
+                  <PlusCircle className="h-4 w-4 text-[#f0d060]" />
+                  <span className="text-xs font-bold text-[#f0d060] uppercase tracking-widest font-heading">Add Registry Entry</span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                  {/* Kind */}
+                  <div>
+                    <label className="block text-[10px] font-semibold text-slate-400 mb-1 uppercase">Report Type</label>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {(['lost', 'found'] as const).map((k) => (
+                        <button
+                          key={k}
+                          type="button"
+                          onClick={() => setAddFormKind(k)}
+                          className={`rounded-lg border py-2 text-[11px] font-bold transition ${
+                            addFormKind === k
+                              ? k === 'lost'
+                                ? 'border-red-500 bg-red-950/60 text-red-300'
+                                : 'border-emerald-500 bg-emerald-950/60 text-emerald-300'
+                              : 'border-slate-700 bg-slate-950/60 text-slate-400 hover:border-slate-500'
+                          }`}
+                        >
+                          {k.toUpperCase()}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Category */}
+                  <div>
+                    <label className="block text-[10px] font-semibold text-slate-400 mb-1 uppercase">Category</label>
+                    <select
+                      value={addFormCategory}
+                      onChange={(e) => setAddFormCategory(e.target.value)}
+                      className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-xs text-white focus:border-[#f0d060] focus:outline-none"
+                    >
+                      {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
+                    </select>
+                  </div>
+
+                  {/* Location */}
+                  <div>
+                    <label className="block text-[10px] font-semibold text-slate-400 mb-1 uppercase">Location / Island</label>
+                    <input
+                      type="text"
+                      value={addFormLocation}
+                      onChange={(e) => setAddFormLocation(e.target.value)}
+                      placeholder="e.g. Water 7 City"
+                      className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-xs text-white focus:border-[#f0d060] focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                {/* Title */}
+                <div>
+                  <label className="block text-[10px] font-semibold text-slate-400 mb-1 uppercase">Relic Title *</label>
+                  <input
+                    required
+                    type="text"
+                    value={addFormTitle}
+                    onChange={(e) => setAddFormTitle(e.target.value)}
+                    placeholder="e.g. Zoro's Wado Ichimonji, Nami's Log Pose..."
+                    className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-xs text-white placeholder-slate-600 focus:border-[#f0d060] focus:outline-none"
+                  />
+                </div>
+
+                {/* Description */}
+                <div>
+                  <label className="block text-[10px] font-semibold text-slate-400 mb-1 uppercase">Description (optional)</label>
+                  <textarea
+                    rows={2}
+                    value={addFormDesc}
+                    onChange={(e) => setAddFormDesc(e.target.value)}
+                    placeholder="Describe the item, any unique markings, or circumstances..."
+                    className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-xs text-white placeholder-slate-600 focus:border-[#f0d060] focus:outline-none"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={addFormSubmitting || !addFormTitle.trim()}
+                  className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-[#d4a843] to-[#b88a2e] px-5 py-2.5 text-xs font-bold text-black hover:brightness-110 disabled:opacity-50 transition"
+                >
+                  <PlusCircle className="h-4 w-4" />
+                  {addFormSubmitting ? 'Adding to Registry...' : 'Add to Registry'}
+                </button>
+              </form>
+            )}
             {/* Filters bar */}
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#d4a843]/20 bg-[#0a1220] p-4">
               <div className="flex items-center gap-2 flex-1 min-w-[200px]">
@@ -301,6 +448,7 @@ export function AdminPage() {
                             <button
                               onClick={async () => {
                                 await recoverItem(item.id)
+                                playRecoverySound()
                                 fireTreasureConfetti()
                                 setCelebrationState({ isOpen: true, title: item.title })
                               }}
@@ -364,6 +512,7 @@ export function AdminPage() {
                         <button
                           onClick={async () => {
                             await recoverItem(item.id)
+                            playRecoverySound()
                             fireTreasureConfetti()
                             setCelebrationState({ isOpen: true, title: item.title })
                           }}

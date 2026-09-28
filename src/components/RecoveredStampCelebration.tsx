@@ -1,6 +1,7 @@
+import { useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Sparkles, Award, CheckCircle } from 'lucide-react'
-import { fireTreasureConfetti } from '../lib/confetti'
+import { fireTreasureConfetti, playConfettiAudio } from '../lib/confetti'
 
 export interface RecoveredCelebrationState {
   isOpen: boolean
@@ -13,14 +14,22 @@ interface RecoveredStampCelebrationProps {
 }
 
 /**
- * Triggers full confetti cannon burst
+ * Triggers full confetti cannon burst and celebratory audio
  */
 export function celebrateRecovery() {
+  playConfettiAudio()
   fireTreasureConfetti()
 }
 
 export function RecoveredStampCelebration({ state, onClose }: RecoveredStampCelebrationProps) {
+  useEffect(() => {
+    if (state.isOpen) {
+      celebrateRecovery()
+    }
+  }, [state.isOpen])
+
   if (!state.isOpen) return null
+
 
   return (
     <AnimatePresence>
