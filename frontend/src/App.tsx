@@ -11,6 +11,7 @@ import { NewsPage } from './pages/NewsPage'
 import { FaqPage } from './pages/FaqPage'
 import { ContactPage } from './pages/ContactPage'
 import { ArchivesPage } from './pages/ArchivesPage'
+import { AdminPage } from './pages/AdminPage'
 
 export default function App() {
   return (
@@ -28,6 +29,7 @@ export default function App() {
             <Route path="/faq" element={<FaqPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/archives" element={<ArchivesPage />} />
+            <Route path="/admin" element={<AdminPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </BrowserRouter>

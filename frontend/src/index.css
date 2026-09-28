@@ -1,19 +1,60 @@
 @import "tailwindcss";
 
 @theme {
-  --font-pirate: "Pirata One", "Georgia", serif;
-  --font-heading: "Cinzel Decorative", "Georgia", serif;
-  --font-body: "Cinzel", "Georgia", serif;
+  --font-pirate: "Pirata One", cursive, serif;
+  --font-heading: "Cinzel Decorative", "Cinzel", "Georgia", serif;
+  --font-sub: "Cinzel", "Georgia", serif;
+  --font-body: "Outfit", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-scroll: "MedievalSharp", cursive, serif;
   --color-gold: #d4a843;
   --color-gold-light: #f0d060;
   --color-gold-dark: #a07830;
+  --color-pirate-gold: #fbbf24;
   --color-parchment: #f4e6c4;
   --color-parchment-dark: #d8c494;
   --color-navy: #0a1628;
   --color-navy-light: #152238;
   --color-ocean: #0d2040;
   --color-crimson: #b91c1c;
+  --color-pirate-red: #991b1b;
+}
+
+/* Explicit font family utilities */
+.font-pirate {
+  font-family: "Pirata One", cursive, serif !important;
+}
+
+.font-heading {
+  font-family: "Cinzel Decorative", "Cinzel", "Georgia", serif !important;
+}
+
+.font-sub {
+  font-family: "Cinzel", "Georgia", serif !important;
+}
+
+.font-body,
+.font-outfit {
+  font-family: "Outfit", ui-sans-serif, system-ui, sans-serif !important;
+}
+
+.font-scroll {
+  font-family: "MedievalSharp", cursive, serif !important;
+  font-style: italic;
+}
+
+.text-gold-gradient {
+  background: linear-gradient(135deg, #f0d060 0%, #d4a843 50%, #a07830 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-crimson-gradient {
+  background: linear-gradient(135deg, #ef4444 0%, #b91c1c 50%, #7f1d1d 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 html,
@@ -28,6 +69,21 @@ body {
   color: #e2e8f0;
   background: #050d18;
   overflow-x: hidden;
+}
+
+/* Unified Form Controls — Ensures all dropdowns & inputs match fonts */
+select,
+input,
+textarea,
+button {
+  font-family: var(--font-body) !important;
+}
+
+select option {
+  font-family: var(--font-body) !important;
+  background-color: #0b1526;
+  color: #f1f5f9;
+  padding: 6px 10px;
 }
 
 * {
