@@ -24,6 +24,28 @@ export const supabase = isSupabaseConfigured
 
 const LOCAL_STORAGE_KEY_REPORTS = "nexasoul_sabaody_reports_v4";
 const LOCAL_STORAGE_KEY_CLAIMS = "nexasoul_sabaody_claims_v4";
+const LOCAL_STORAGE_KEY_DELETED = "nexasoul_sabaody_deleted_ids_v1";
+
+export function getDeletedReportIds() {
+  try {
+    const raw = localStorage.getItem(LOCAL_STORAGE_KEY_DELETED);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function markReportAsDeleted(reportId) {
+  try {
+    const current = getDeletedReportIds();
+    if (!current.includes(reportId)) {
+      current.push(reportId);
+      localStorage.setItem(LOCAL_STORAGE_KEY_DELETED, JSON.stringify(current));
+    }
+  } catch (e) {
+    console.error("Local storage deleted ids write error", e);
+  }
+}
 
 /**
  * Normalizes an item to have both kind ('lost'|'found') and type ('LOST'|'FOUND')
@@ -146,7 +168,15 @@ export async function fetchAllReports() {
             return fetchAllReports();
           }
         } else {
-          return data.map((row) =>
+          const deletedIds = getDeletedReportIds();
+          const list = data
+            .filter((row) => {
+              if (deletedIds.includes(row.id)) return false;
+              if (row.contact_info === "__DELETED__") return false;
+              if (row.title && row.title.startsWith("[DELETED]")) return false;
+              return true;
+            })
+            .map((row) =>
             normalizeReport({
               id: row.id,
               type: row.type,
@@ -163,6 +193,8 @@ export async function fetchAllReports() {
               createdAt: row.created_at,
             })
           );
+          saveReportsToLocalStorage(list);
+          return list;
         }
       }
     } catch (err) {
@@ -173,10 +205,18 @@ export async function fetchAllReports() {
   // Local storage fallback
   try {
     const raw = localStorage.getItem(LOCAL_STORAGE_KEY_REPORTS);
+    const deletedIds = getDeletedReportIds();
     if (raw) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed.map(normalizeReport);
+        return parsed
+          .filter(
+            (r) =>
+              !deletedIds.includes(r.id) &&
+              r.contactInfo !== "__DELETED__" &&
+              !(r.title && r.title.startsWith("[DELETED]"))
+          )
+          .map(normalizeReport);
       }
     }
   } catch (e) {
@@ -286,8 +326,17 @@ export async function updateReportStatus(reportId, newStatus) {
  * Delete a report from Supabase and local storage
  */
 export async function deleteReport(reportId) {
+  markReportAsDeleted(reportId);
+
   if (supabase) {
     try {
+      // Mark as deleted in DB so other clients/sessions also filter it out
+      await supabase
+        .from("reports")
+        .update({ contact_info: "__DELETED__", title: `[DELETED] ${reportId}` })
+        .eq("id", reportId);
+
+      // Also attempt physical delete if permitted by RLS
       await supabase.from("reports").delete().eq("id", reportId);
     } catch (err) {
       console.warn("Supabase delete report error:", err);

@@ -1,5 +1,6 @@
+import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { X } from 'lucide-react'
+import { X, Trash2 } from 'lucide-react'
 import { useRegistry } from '../context/RegistryContext'
 import type { MatchResult, RegistryItem } from '../types'
 import { ItemThumb, StatusTag } from './ItemArt'
@@ -78,8 +79,9 @@ type ItemDetailModalProps = {
 }
 
 export function ItemDetailModal({ item, onClose }: ItemDetailModalProps) {
-  const { items, recoverItem } = useRegistry()
+  const { items, recoverItem, deleteItem } = useRegistry()
   const live = (item && items.find((entry) => entry.id === item.id)) || item
+  const [isDeleting, setIsDeleting] = useState(false)
 
   return (
     <AnimatePresence>
@@ -151,6 +153,23 @@ export function ItemDetailModal({ item, onClose }: ItemDetailModalProps) {
                   Mark Recovered
                 </button>
               )}
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={async () => {
+                  if (window.confirm(`Are you sure you want to permanently delete "${live.title}"?`)) {
+                    setIsDeleting(true)
+                    await deleteItem(live.id)
+                    setIsDeleting(false)
+                    onClose()
+                  }
+                }}
+                className="rounded-xl border border-red-500/50 bg-red-500/20 px-3 py-2 text-xs font-bold text-red-300 hover:bg-red-500/30 transition flex items-center gap-1.5"
+                title="Delete this record"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                <span>{isDeleting ? 'Deleting...' : 'Delete'}</span>
+              </button>
             </div>
             {live.claimedBy && <p className="mt-3 text-xs text-emerald-300 font-body">Claim filed by {live.claimedBy}</p>}
           </motion.div>

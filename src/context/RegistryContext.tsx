@@ -12,6 +12,7 @@ import {
   saveReport,
   updateReportStatus,
   submitClaim as dbSubmitClaim,
+  deleteReport,
 } from '../lib/dbService'
 import { findBestMatchesForReport } from '../lib/matchingEngine'
 
@@ -24,6 +25,7 @@ type RegistryContextValue = {
   }>
   claimItem: (id: string, claimedBy: string, proof?: string) => Promise<void>
   recoverItem: (id: string) => Promise<void>
+  deleteItem: (id: string) => Promise<void>
   findMatches: (item: RegistryItem) => MatchResult[]
   refreshItems: () => Promise<void>
 }
@@ -125,8 +127,13 @@ export function RegistryProvider({ children }: { children: ReactNode }) {
     )
   }
 
+  async function deleteItem(id: string) {
+    await deleteReport(id)
+    setItems((prev) => prev.filter((item) => item.id !== id))
+  }
+
   function findMatches(targetItem: RegistryItem): MatchResult[] {
-    return findBestMatchesForReport(targetItem, items, 30, 10)
+    return findBestMatchesForReport(targetItem, items, 55, 10)
   }
 
   const value = useMemo(
@@ -136,6 +143,7 @@ export function RegistryProvider({ children }: { children: ReactNode }) {
       addItem,
       claimItem,
       recoverItem,
+      deleteItem,
       findMatches,
       refreshItems: loadData,
     }),

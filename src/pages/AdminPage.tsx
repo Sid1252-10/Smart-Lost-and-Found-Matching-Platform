@@ -9,6 +9,7 @@ import {
   Search,
   BarChart3,
   Layers,
+  Trash2,
 } from 'lucide-react'
 import { CATEGORIES } from '../data/catalog'
 import { canonicalCategory } from '../lib/categories'
@@ -18,7 +19,7 @@ import { AdminAuthGate } from '../components/AdminAuthGate'
 import type { RegistryItem } from '../types'
 
 export function AdminPage() {
-  const { items, recoverItem } = useRegistry()
+  const { items, recoverItem, deleteItem } = useRegistry()
   const [activeTab, setActiveTab] = useState<'analytics' | 'reports' | 'claims'>('analytics')
   const [search, setSearch] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('')
@@ -299,6 +300,18 @@ export function AdminPage() {
                               Recover
                             </button>
                           )}
+
+                          <button
+                            onClick={async () => {
+                              if (window.confirm(`Permanently remove "${item.title}" from registry?`)) {
+                                await deleteItem(item.id)
+                              }
+                            }}
+                            title="Delete report"
+                            className="rounded p-1 text-red-400 hover:text-red-300 hover:bg-red-950/50"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
                         </div>
                       </td>
                     </tr>
