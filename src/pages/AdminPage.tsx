@@ -4,32 +4,25 @@ import { Footer } from '../components/Footer'
 import { useRegistry } from '../context/RegistryContext'
 import {
   ShieldCheck,
-  CheckCircle2,
-  XCircle,
   Eye,
   FileSpreadsheet,
-  Trash2,
   Search,
-  Filter,
   BarChart3,
   Layers,
-  Sparkles,
-  MapPin,
-  Clock,
 } from 'lucide-react'
 import { CATEGORIES } from '../data/catalog'
-import { ItemThumb, StatusTag } from '../components/ItemArt'
+import { StatusTag } from '../components/ItemArt'
 import { ItemDetailModal } from '../components/Modals'
+import { AdminAuthGate } from '../components/AdminAuthGate'
 import type { RegistryItem } from '../types'
 
 export function AdminPage() {
-  const { items, recoverItem, claimItem } = useRegistry()
+  const { items, recoverItem } = useRegistry()
   const [activeTab, setActiveTab] = useState<'analytics' | 'reports' | 'claims'>('analytics')
   const [search, setSearch] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [detailItem, setDetailItem] = useState<RegistryItem | null>(null)
-  const [claimsList, setClaimsList] = useState<any[]>([])
 
   // Analytics Metrics
   const total = items.length
@@ -71,8 +64,9 @@ export function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050b14] text-[#e2e8f0] flex flex-col font-body">
-      <Navbar />
+    <AdminAuthGate>
+      <div className="min-h-screen bg-[#050b14] text-[#e2e8f0] flex flex-col font-body">
+        <Navbar />
 
       <main className="flex-1 mx-auto max-w-[1440px] w-full px-4 py-8 md:px-8">
         {/* Admin Header */}
@@ -364,6 +358,7 @@ export function AdminPage() {
       {/* Item detail modal */}
       <ItemDetailModal item={detailItem} onClose={() => setDetailItem(null)} />
       <Footer />
-    </div>
+      </div>
+    </AdminAuthGate>
   )
 }
