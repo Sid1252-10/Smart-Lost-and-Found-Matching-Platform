@@ -18,6 +18,12 @@ export default function App() {
   return (
     <AuthProvider>
       <RegistryProvider>
+        {/* Animated water bubble background */}
+        <div className="water-bubbles" aria-hidden="true">
+          {Array.from({ length: 20 }, (_, i) => (
+            <div key={i} className="bubble" />
+          ))}
+        </div>
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<HomePage />} />

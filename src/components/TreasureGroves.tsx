@@ -95,7 +95,7 @@ export function TreasureGroves({ onSelectGrove }: TreasureGrovesProps) {
   const selectedItems = selectedGrove ? getGroveActualItems(selectedGrove.id, selectedGrove.name) : []
 
   return (
-    <section className="relative w-full py-6 px-4 md:px-8 bg-[#040810] text-center">
+    <section className="relative w-full py-6 px-4 md:px-8 text-center" style={{ background: 'rgba(2,10,22,0.45)', backdropFilter: 'blur(0px)' }}>
       <div className="mx-auto max-w-[1440px]">
         {/* Ornate Section Header */}
         <div className="flex items-center justify-center gap-4 mb-6">
@@ -116,7 +116,7 @@ export function TreasureGroves({ onSelectGrove }: TreasureGrovesProps) {
               <div
                 key={grove.id}
                 onClick={() => handleCardClick(grove)}
-                className="group relative cursor-pointer overflow-hidden rounded-md border border-[#d4a843]/30 bg-[#091220] transition-all duration-300 hover:-translate-y-1.5 hover:border-[#f0d060] hover:shadow-[0_8px_25px_rgba(240,208,96,0.3)] w-full max-w-[180px]"
+                className="group relative cursor-pointer overflow-hidden rounded-md border border-[#d4a843]/30 bg-[#091220]/70 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1.5 hover:border-[#f0d060] hover:shadow-[0_8px_25px_rgba(240,208,96,0.3)] w-full max-w-[180px]"
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => {
@@ -124,7 +124,7 @@ export function TreasureGroves({ onSelectGrove }: TreasureGrovesProps) {
                 }}
               >
                 {/* Exact Card Artwork from Image */}
-                <div className="aspect-[98/155] w-full overflow-hidden bg-black relative">
+                <div className="aspect-[98/155] w-full overflow-hidden relative" style={{ background: 'rgba(5,15,30,0.7)' }}>
                   <img
                     src={grove.img}
                     alt={`${grove.name} - ${grove.subtitle}`}

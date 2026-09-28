@@ -26,7 +26,7 @@ export function HomePage() {
   }
 
   return (
-    <div className="relative min-h-screen bg-[#050b14] text-[#e2e8f0] flex flex-col overflow-x-hidden">
+    <div className="relative min-h-screen text-[#e2e8f0] flex flex-col overflow-x-hidden">
       {/* Top Navigation Bar */}
       <Navbar
         onWorldClick={() => setWorldOpen(true)}
