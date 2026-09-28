@@ -108,7 +108,7 @@ export function SelectedArtifacts({ onSelectArtifact }: SelectedArtifactsProps) 
   }
 
   return (
-    <section className="relative w-full py-6 px-4 md:px-8 bg-[#03060c] text-center">
+    <section className="relative w-full py-6 px-4 md:px-8 text-center" style={{ background: 'rgba(2,8,18,0.45)' }}>
       <div className="mx-auto max-w-[1440px]">
         {/* Ornate Section Header */}
         <div className="flex items-center justify-center gap-4 mb-6">
@@ -127,7 +127,7 @@ export function SelectedArtifacts({ onSelectArtifact }: SelectedArtifactsProps) 
             <div
               key={art.id}
               onClick={() => handleCardClick(art)}
-              className="group relative cursor-pointer overflow-hidden rounded-md border border-[#d4a843]/30 bg-[#091220] transition-all duration-300 hover:-translate-y-1.5 hover:border-[#f0d060] hover:shadow-[0_8px_25px_rgba(240,208,96,0.3)] w-full max-w-[180px]"
+              className="group relative cursor-pointer overflow-hidden rounded-md border border-[#d4a843]/30 bg-[#091220]/70 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1.5 hover:border-[#f0d060] hover:shadow-[0_8px_25px_rgba(240,208,96,0.3)] w-full max-w-[180px]"
               role="button"
               tabIndex={0}
               onKeyDown={(e) => {
@@ -135,7 +135,7 @@ export function SelectedArtifacts({ onSelectArtifact }: SelectedArtifactsProps) 
               }}
             >
               {/* Exact Card Artwork from Image */}
-              <div className="aspect-[98/136] w-full overflow-hidden bg-black">
+              <div className="aspect-[98/136] w-full overflow-hidden" style={{ background: 'rgba(5,15,30,0.7)' }}>
                 <img
                   src={art.img}
                   alt={`${art.name} - ${art.subtitle}`}
