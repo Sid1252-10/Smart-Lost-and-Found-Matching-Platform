@@ -1,22 +1,30 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Navbar } from '../components/Navbar'
 import { Footer } from '../components/Footer'
 import { MAP_INCIDENTS, type IslandIncident } from '../components/WorldMapModal'
-import { Compass, Eye, EyeOff, MapPin, RotateCcw, X, ZoomIn, ZoomOut } from 'lucide-react'
+import { getIslandActualItems } from '../components/GrandLineMap'
+import { useRegistry } from '../context/RegistryContext'
+import { Compass, Eye, EyeOff, MapPin, RotateCcw, X, ZoomIn, ZoomOut, PlusCircle, ArrowRight } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 export function WorldPage() {
+  const { items } = useRegistry()
   const [scale, setScale] = useState(1)
   const [showPins, setShowPins] = useState(true)
   const [selectedIncident, setSelectedIncident] = useState<IslandIncident | null>(null)
   const navigate = useNavigate()
+
+  const selectedItems = useMemo(() => {
+    if (!selectedIncident) return []
+    return getIslandActualItems(items, selectedIncident.id, selectedIncident.name)
+  }, [items, selectedIncident])
 
   const handleZoomIn = () => setScale((s) => Math.min(s + 0.25, 2.5))
   const handleZoomOut = () => setScale((s) => Math.max(s - 0.25, 0.75))
   const handleReset = () => setScale(1)
 
   return (
-    <div className="min-h-screen bg-[#060b14] text-[#e2e8f0] flex flex-col">
+    <div className="relative min-h-screen text-[#e2e8f0] flex flex-col font-body">
       <Navbar />
 
       <main className="flex-1 flex flex-col">
@@ -118,7 +126,10 @@ export function WorldPage() {
                     <MapPin className="h-3 w-3 text-[#f0d060]" />
                   </span>
                   <span className="pointer-events-none absolute bottom-full mb-1.5 hidden whitespace-nowrap rounded bg-black/90 px-2 py-0.5 text-[10px] font-bold tracking-wider text-[#f0d060] border border-[#d4a843]/50 group-hover:block shadow-lg">
-                    {inc.name} ({inc.itemsLogged} items)
+                    {inc.name}
+                    {getIslandActualItems(items, inc.id, inc.name).length > 0
+                      ? ` (${getIslandActualItems(items, inc.id, inc.name).length})`
+                      : ''}
                   </span>
                 </button>
               ))}
@@ -162,16 +173,62 @@ export function WorldPage() {
             </div>
           </div>
 
+          {/* Real Live Database Items for this Island */}
+          <div className="mt-3 pt-2 border-t border-slate-700/50">
+            <div className="flex items-center justify-between text-xs mb-1.5">
+              <span className="text-slate-300 text-[11px]">
+                <strong className="text-[#f0d060]">{selectedItems.length}</strong> {selectedItems.length === 1 ? 'Relic' : 'Relics'} on Record
+              </span>
+              {selectedItems.length > 0 && (
+                <span className="text-[10px] text-slate-400">
+                  {selectedItems.filter(i => i.kind === 'found').length} Found · {selectedItems.filter(i => i.kind === 'lost').length} Lost
+                </span>
+              )}
+            </div>
+
+            {selectedItems.length > 0 ? (
+              <div className="space-y-1 max-h-28 overflow-y-auto pr-1">
+                {selectedItems.slice(0, 3).map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex items-center justify-between rounded bg-black/40 px-2 py-1 text-[11px] border border-slate-800"
+                  >
+                    <span className="truncate text-white font-medium pr-2">{item.title}</span>
+                    <span
+                      className={`shrink-0 rounded px-1.5 py-0.2 text-[9px] font-bold uppercase ${
+                        item.kind === 'found'
+                          ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-500/40'
+                          : 'bg-amber-950/80 text-amber-400 border border-amber-500/40'
+                      }`}
+                    >
+                      {item.kind}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-[11px] text-slate-400 italic">
+                No reports currently recorded for this island.
+              </p>
+            )}
+          </div>
+
           <div className="mt-4 flex items-center justify-between border-t border-[#d4a843]/20 pt-3">
-            <span className="text-xs text-slate-300">
-              <strong className="text-[#f0d060]">{selectedIncident.itemsLogged}</strong> Lost & Found Logged
-            </span>
+            <button
+              type="button"
+              onClick={() => navigate(`/report?location=${selectedIncident.id}`)}
+              className="flex items-center gap-1 text-[11px] text-amber-300 hover:text-white"
+            >
+              <PlusCircle className="h-3.5 w-3.5" />
+              <span>Report Item</span>
+            </button>
             <button
               type="button"
               onClick={() => navigate(`/browse?location=${selectedIncident.id}`)}
-              className="rounded bg-gradient-to-r from-[#d4a843] to-[#b88a2e] px-3 py-1.5 text-xs font-bold text-black hover:brightness-110"
+              className="flex items-center gap-1 rounded bg-gradient-to-r from-[#d4a843] to-[#b88a2e] px-3 py-1.5 text-xs font-bold text-black hover:brightness-110 shadow-md"
             >
-              View Items
+              <span>View in Ledger</span>
+              <ArrowRight className="h-3 w-3" />
             </button>
           </div>
         </div>

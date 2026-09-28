@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Compass, MapPin, X, ArrowRight } from 'lucide-react'
+import { Compass, MapPin, X, ArrowRight, PlusCircle, CheckCircle2, ShieldAlert } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useRegistry } from '../context/RegistryContext'
 import { normalizeIslandId } from './GrandLineMap'
@@ -93,6 +93,8 @@ export function TreasureGroves({ onSelectGrove }: TreasureGrovesProps) {
   }
 
   const selectedItems = selectedGrove ? getGroveActualItems(selectedGrove.id, selectedGrove.name) : []
+  const selectedFoundItems = selectedItems.filter((i) => i.kind === 'found')
+  const selectedLostItems = selectedItems.filter((i) => i.kind === 'lost')
 
   return (
     <section className="relative w-full py-6 px-4 md:px-8 text-center" style={{ background: 'rgba(2,10,22,0.45)', backdropFilter: 'blur(0px)' }}>
@@ -102,7 +104,7 @@ export function TreasureGroves({ onSelectGrove }: TreasureGrovesProps) {
           <div className="h-[1px] w-12 md:w-32 bg-gradient-to-r from-transparent to-[#d4a843]/60" />
           <span className="text-[#d4a843] text-sm">⚓</span>
           <h2 className="font-pirate text-2xl md:text-3xl font-bold tracking-[0.2em] text-[#f0d060] uppercase drop-shadow-[0_2px_10px_rgba(212,168,67,0.3)]">
-            TREASURE GROVES
+            TREASURE GROVES & SECTOR SEAS
           </h2>
           <span className="text-[#d4a843] text-sm">⚓</span>
           <div className="h-[1px] w-12 md:w-32 bg-gradient-to-l from-transparent to-[#d4a843]/60" />
@@ -111,7 +113,10 @@ export function TreasureGroves({ onSelectGrove }: TreasureGrovesProps) {
         {/* 6 Grove Cards in Landscape Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4 justify-items-center font-body">
           {GROVES.map((grove) => {
-            const actualCount = getGroveActualItems(grove.id, grove.name).length
+            const groveItems = getGroveActualItems(grove.id, grove.name)
+            const foundCount = groveItems.filter((i) => i.kind === 'found').length
+            const lostCount = groveItems.filter((i) => i.kind === 'lost').length
+
             return (
               <div
                 key={grove.id}
@@ -131,9 +136,18 @@ export function TreasureGroves({ onSelectGrove }: TreasureGrovesProps) {
                     className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                     loading="lazy"
                   />
-                  {/* Live real-time registry count badge */}
-                  <div className="absolute bottom-2 right-2 rounded bg-black/80 px-1.5 py-0.5 border border-[#d4a843]/50 text-[10px] font-bold text-[#f0d060]">
-                    {actualCount} {actualCount === 1 ? 'item' : 'items'}
+
+                  {/* Clean Island Status Badge (Placed at TOP-RIGHT, avoiding overlapping bottom card artwork) */}
+                  <div className="absolute top-2 right-2 flex flex-col items-end gap-1">
+                    {foundCount > 0 ? (
+                      <span className="rounded bg-emerald-950/90 border border-emerald-500/70 px-2 py-0.5 text-[9px] font-bold text-emerald-300 shadow-md backdrop-blur-sm">
+                        ✓ {foundCount} Found
+                      </span>
+                    ) : (
+                      <span className="rounded bg-black/60 border border-slate-700/60 px-1.5 py-0.5 text-[9px] text-slate-400 backdrop-blur-sm opacity-80 group-hover:opacity-100">
+                        {lostCount > 0 ? `${lostCount} Lost` : '0 Reports'}
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -184,31 +198,42 @@ export function TreasureGroves({ onSelectGrove }: TreasureGrovesProps) {
                 </div>
               </div>
 
+              {/* Items Found vs Lost Statistics */}
               <div className="mt-5 grid grid-cols-2 gap-3 border-t border-[#d4a843]/20 pt-4 text-xs">
-                <div className="rounded bg-black/40 p-2.5">
-                  <span className="text-slate-400 block mb-1">Cataloged in Live Ledger:</span>
-                  <span className="font-bold text-[#f0d060] text-sm">
-                    {selectedItems.length} Registered {selectedItems.length === 1 ? 'Report' : 'Reports'}
+                <div className="rounded-lg bg-emerald-950/30 border border-emerald-500/30 p-2.5">
+                  <span className="text-emerald-300/80 block text-[11px] mb-0.5 font-semibold">
+                    Recovered / Found by Scouts:
+                  </span>
+                  <span className="font-bold text-emerald-400 text-sm flex items-center gap-1.5">
+                    <CheckCircle2 className="h-4 w-4" />
+                    {selectedFoundItems.length} Found {selectedFoundItems.length === 1 ? 'Relic' : 'Relics'} Logged
                   </span>
                 </div>
-                <div className="rounded bg-black/40 p-2.5">
-                  <span className="text-slate-400 block mb-1">Sea Danger:</span>
-                  <span className="font-bold text-amber-300 text-sm">
-                    {selectedGrove.dangerLevel}
+                <div className="rounded-lg bg-red-950/30 border border-red-500/30 p-2.5">
+                  <span className="text-red-300/80 block text-[11px] mb-0.5 font-semibold">
+                    Reported Lost by Pirates:
+                  </span>
+                  <span className="font-bold text-red-400 text-sm flex items-center gap-1.5">
+                    <ShieldAlert className="h-4 w-4" />
+                    {selectedLostItems.length} Lost {selectedLostItems.length === 1 ? 'Relic' : 'Relics'} Reported
                   </span>
                 </div>
               </div>
 
               <div className="mt-4">
                 <span className="text-xs text-slate-400 font-semibold block mb-2">
-                  Actual Relics Logged at this Island:
+                  Live Items Registered at {selectedGrove.name}:
                 </span>
                 {selectedItems.length > 0 ? (
-                  <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto">
+                  <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto pr-1">
                     {selectedItems.map((item) => (
                       <span
                         key={item.id}
-                        className="rounded bg-[#d4a843]/15 border border-[#d4a843]/40 px-2 py-0.5 text-[11px] text-[#f0d060]"
+                        className={`rounded px-2 py-0.5 text-[11px] font-medium border ${
+                          item.kind === 'found'
+                            ? 'bg-emerald-950/50 border-emerald-500/50 text-emerald-300'
+                            : 'bg-red-950/50 border-red-500/50 text-red-300'
+                        }`}
                       >
                         {item.title} ({item.kind.toUpperCase()})
                       </span>
@@ -216,12 +241,13 @@ export function TreasureGroves({ onSelectGrove }: TreasureGrovesProps) {
                   </div>
                 ) : (
                   <p className="text-xs text-slate-400 italic">
-                    No active lost/found items registered at this island yet. Be the first captain to report an item here!
+                    No active items registered at this island yet. Be the first captain or citizen to report an item found here!
                   </p>
                 )}
               </div>
 
-              <div className="mt-6 flex justify-end gap-3 font-heading">
+              {/* Action Buttons */}
+              <div className="mt-6 flex flex-wrap justify-end gap-2.5 font-body">
                 <button
                   type="button"
                   onClick={() => setSelectedGrove(null)}
@@ -229,6 +255,20 @@ export function TreasureGroves({ onSelectGrove }: TreasureGrovesProps) {
                 >
                   Close
                 </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const targetLoc = selectedGrove.id
+                    setSelectedGrove(null)
+                    navigate(`/report?location=${targetLoc}&kind=found`)
+                  }}
+                  className="flex items-center gap-1.5 rounded-lg border border-emerald-500/50 bg-emerald-500/20 px-3 py-2 text-xs font-bold text-emerald-300 hover:bg-emerald-500/30 transition-colors"
+                >
+                  <PlusCircle className="h-3.5 w-3.5" />
+                  Report Found Item Here
+                </button>
+
                 <button
                   type="button"
                   onClick={() => {
@@ -236,10 +276,10 @@ export function TreasureGroves({ onSelectGrove }: TreasureGrovesProps) {
                     setSelectedGrove(null)
                     navigate(`/browse?location=${targetLoc}`)
                   }}
-                  className="flex items-center gap-2 rounded bg-gradient-to-r from-[#d4a843] to-[#b88a2e] px-4 py-2 text-xs font-bold text-black hover:brightness-110"
+                  className="flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-[#d4a843] to-[#b88a2e] px-4 py-2 text-xs font-bold text-black hover:brightness-110 shadow"
                 >
                   <Compass className="h-4 w-4" />
-                  Inspect {selectedItems.length} Records in Ledger
+                  View All ({selectedItems.length}) in Ledger
                   <ArrowRight className="h-3.5 w-3.5" />
                 </button>
               </div>

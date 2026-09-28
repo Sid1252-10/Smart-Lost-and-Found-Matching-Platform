@@ -1,6 +1,8 @@
 import { useState, useMemo } from 'react'
 import { ZoomIn, ZoomOut, RotateCcw, MapPin, Compass, Eye, EyeOff, X } from 'lucide-react'
 import { MAP_INCIDENTS, type IslandIncident } from './WorldMapModal'
+import { useRegistry } from '../context/RegistryContext'
+import type { RegistryItem } from '../types'
 
 export interface GrandLineMapProps {
   selectedId?: string
@@ -18,6 +20,22 @@ export function normalizeIslandId(id?: string): string {
   return id.toLowerCase().replace(/[-_\s]/g, '')
 }
 
+// Single source of truth to get actual database items for any island
+export function getIslandActualItems(items: RegistryItem[] = [], islandId: string, islandName: string): RegistryItem[] {
+  const normTarget = normalizeIslandId(islandId)
+  const normName = normalizeIslandId(islandName)
+  return items.filter((item) => {
+    const locId = normalizeIslandId(item.locationId)
+    const loc = normalizeIslandId(item.location)
+    return (
+      locId === normTarget ||
+      locId === normName ||
+      loc.includes(normTarget) ||
+      loc.includes(normName)
+    )
+  })
+}
+
 export function GrandLineMap({
   selectedId = '',
   onSelect,
@@ -26,6 +44,7 @@ export function GrandLineMap({
   subtitle = 'Official Navigational Chart — Click pins on the map to select destination',
   className = '',
 }: GrandLineMapProps) {
+  const { items } = useRegistry()
   const [scale, setScale] = useState(1)
   const [showPins, setShowPins] = useState(true)
 
@@ -43,6 +62,11 @@ export function GrandLineMap({
         normalizeIslandId(inc.name) === normalizedSelected,
     )
   }, [normalizedSelected])
+
+  const selectedIslandItems = useMemo(() => {
+    if (!selectedIncident) return []
+    return getIslandActualItems(items, selectedIncident.id, selectedIncident.name)
+  }, [items, selectedIncident])
 
   // Background variant (for ContactPage, FaqPage, etc.)
   if (variant === 'background') {
@@ -133,7 +157,8 @@ export function GrandLineMap({
             <span className="text-slate-400">Selected Island:</span>
             <span className="font-bold text-[#f0d060] truncate">{selectedIncident.name}</span>
             <span className="hidden md:inline text-slate-400">
-              — {selectedIncident.itemsLogged} items on record
+              — {selectedIslandItems.length} {selectedIslandItems.length === 1 ? 'relic' : 'relics'} on record
+              {selectedIslandItems.length > 0 && ` (${selectedIslandItems.filter(i => i.kind === 'found').length} Found, ${selectedIslandItems.filter(i => i.kind === 'lost').length} Lost)`}
             </span>
           </div>
           {onSelect && (
@@ -227,6 +252,9 @@ export function GrandLineMap({
                     }`}
                   >
                     {inc.name}
+                    {getIslandActualItems(items, inc.id, inc.name).length > 0
+                      ? ` (${getIslandActualItems(items, inc.id, inc.name).length})`
+                      : ''}
                   </span>
                 </button>
               )
@@ -257,19 +285,31 @@ export function GrandLineMap({
             const isSelected =
               normalizeIslandId(inc.id) === normalizedSelected ||
               normalizeIslandId(inc.name) === normalizedSelected
+            const count = getIslandActualItems(items, inc.id, inc.name).length
 
             return (
               <button
                 key={inc.id}
                 type="button"
                 onClick={() => onSelect?.(isSelected ? '' : inc.id)}
-                className={`rounded-full px-3 py-1 text-[11px] font-semibold tracking-wide whitespace-nowrap transition-colors ${
+                className={`rounded-full px-3 py-1 text-[11px] font-semibold tracking-wide whitespace-nowrap transition-colors flex items-center gap-1.5 ${
                   isSelected
                     ? 'bg-[#f0d060] text-black font-bold shadow-[0_0_10px_rgba(240,208,96,0.6)]'
                     : 'bg-black/40 text-slate-300 hover:text-[#f0d060] hover:bg-black/70 border border-[#d4a843]/20'
                 }`}
               >
-                {inc.name}
+                <span>{inc.name}</span>
+                {count > 0 && (
+                  <span
+                    className={`rounded-full px-1.5 py-0.2 text-[9px] font-bold ${
+                      isSelected
+                        ? 'bg-black/80 text-[#f0d060]'
+                        : 'bg-[#d4a843]/20 text-[#f0d060] border border-[#d4a843]/40'
+                    }`}
+                  >
+                    {count}
+                  </span>
+                )}
               </button>
             )
           })}

@@ -8,6 +8,7 @@ import { CATEGORIES, COLOURS, ISLANDS, UNIQUE_MARKS } from '../data/catalog'
 import { useRegistry } from '../context/RegistryContext'
 import type { ItemKind, MatchResult } from '../types'
 import { getGroveOptions, getZoneForGrove } from '../lib/sabaodyMap'
+import { uploadTreasureImage } from '../lib/dbService'
 import { CheckCircle2, MapPin, Radio, Send, Sparkles, X, Compass, Image as ImageIcon } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
@@ -21,6 +22,7 @@ export function ReportPage() {
   const [submitted, setSubmitted] = useState<{ id: string; title: string; kind: ItemKind } | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [imagePreview, setImagePreview] = useState<string>('')
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [foundMatches, setFoundMatches] = useState<MatchResult[]>([])
   const [showMatchModal, setShowMatchModal] = useState(false)
 
@@ -35,11 +37,36 @@ export function ReportPage() {
     const file = e.target.files?.[0]
     if (!file) return
 
+    setSelectedFile(file)
     const reader = new FileReader()
-    reader.onloadend = () => {
-      setImagePreview(reader.result as string)
+    reader.onload = (event) => {
+      const img = new Image()
+      img.onload = () => {
+        const canvas = document.createElement('canvas')
+        const MAX_DIM = 800
+        let { width, height } = img
+        if (width > height && width > MAX_DIM) {
+          height = Math.round((height * MAX_DIM) / width)
+          width = MAX_DIM
+        } else if (height > MAX_DIM) {
+          width = Math.round((width * MAX_DIM) / height)
+          height = MAX_DIM
+        }
+        canvas.width = width
+        canvas.height = height
+        const ctx = canvas.getContext('2d')
+        ctx?.drawImage(img, 0, 0, width, height)
+        const optimizedDataUrl = canvas.toDataURL('image/jpeg', 0.8)
+        setImagePreview(optimizedDataUrl)
+      }
+      img.src = event.target?.result as string
     }
     reader.readAsDataURL(file)
+  }
+
+  function handleRemoveImage() {
+    setImagePreview('')
+    setSelectedFile(null)
   }
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -54,6 +81,14 @@ export function ReportPage() {
     const newId = crypto.randomUUID()
 
     try {
+      let finalImageUrl = imagePreview
+      if (selectedFile) {
+        const uploadRes = await uploadTreasureImage(selectedFile)
+        if (uploadRes?.url) {
+          finalImageUrl = uploadRes.url
+        }
+      }
+
       const result = await addItem({
         id: newId,
         kind,
@@ -66,10 +101,10 @@ export function ReportPage() {
         colour: String(data.get('colour')),
         uniqueMarks: String(data.get('uniqueMarks')),
         description: String(data.get('description')),
-        dateLost: kind === 'lost' ? String(data.get('date') || '') : undefined,
-        dateFound: kind === 'found' ? String(data.get('date') || '') : undefined,
-        incidentDate: String(data.get('date') || ''),
-        imageUrl: imagePreview,
+        dateLost: kind === 'lost' ? String(data.get('date') || incidentDate) : undefined,
+        dateFound: kind === 'found' ? String(data.get('date') || incidentDate) : undefined,
+        incidentDate: String(data.get('date') || incidentDate),
+        imageUrl: finalImageUrl,
       })
 
       setSubmitted({ id: newId, title, kind })
@@ -82,6 +117,7 @@ export function ReportPage() {
       form.reset()
       setIncidentDate(new Date().toISOString().split('T')[0])
       setImagePreview('')
+      setSelectedFile(null)
     } catch (err) {
       console.error('Failed to submit report:', err)
     } finally {
@@ -90,7 +126,7 @@ export function ReportPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#060b14] text-[#e2e8f0] flex flex-col">
+    <div className="relative min-h-screen text-[#e2e8f0] flex flex-col font-body">
       <Navbar onAuthClick={() => setAuthOpen(true)} />
 
       <main className="flex-1 px-4 py-6 md:px-8 max-w-[1440px] mx-auto w-full">
@@ -335,16 +371,27 @@ export function ReportPage() {
                   <ImageIcon className="h-3.5 w-3.5 text-[#f0d060]" />
                   <span>Optional Treasure Photo</span>
                 </label>
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-3">
                   <input
                     type="file"
                     accept="image/*"
                     onChange={handleImageUpload}
-                    className="rounded-lg border border-slate-700 bg-slate-950/70 px-3 py-1.5 text-xs text-slate-300 file:mr-2 file:rounded file:border-0 file:bg-[#d4a843] file:px-2.5 file:py-0.5 file:text-xs file:font-semibold file:text-black hover:file:brightness-110"
+                    className="rounded-lg border border-slate-700 bg-slate-950/70 px-3 py-1.5 text-xs text-slate-300 file:mr-2 file:rounded file:border-0 file:bg-[#d4a843] file:px-2.5 file:py-0.5 file:text-xs file:font-semibold file:text-black hover:file:brightness-110 cursor-pointer"
                   />
                   {imagePreview && (
-                    <div className="relative h-10 w-10 overflow-hidden rounded-lg border border-[#d4a843]/60">
-                      <img src={imagePreview} alt="Preview" className="h-full w-full object-cover" />
+                    <div className="flex items-center gap-2 rounded-lg border border-[#d4a843]/50 bg-black/60 px-2 py-1">
+                      <div className="relative h-9 w-9 overflow-hidden rounded border border-[#d4a843]/70 shrink-0">
+                        <img src={imagePreview} alt="Preview" className="h-full w-full object-cover" />
+                      </div>
+                      <span className="text-[11px] text-[#f0d060] font-medium">Photo Attached</span>
+                      <button
+                        type="button"
+                        onClick={handleRemoveImage}
+                        className="ml-1 rounded p-1 text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                        title="Remove photo"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
                     </div>
                   )}
                 </div>

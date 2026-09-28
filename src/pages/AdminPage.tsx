@@ -11,6 +11,7 @@ import {
   Layers,
 } from 'lucide-react'
 import { CATEGORIES } from '../data/catalog'
+import { canonicalCategory } from '../lib/categories'
 import { StatusTag } from '../components/ItemArt'
 import { ItemDetailModal } from '../components/Modals'
 import { AdminAuthGate } from '../components/AdminAuthGate'
@@ -32,11 +33,12 @@ export function AdminPage() {
   const pendingClaims = items.filter((i) => i.status === 'CLAIMED' || i.status === 'CLAIM_PENDING').length
   const recoveryRate = total > 0 ? Math.round((totalRecovered / total) * 100) : 0
 
-  // Category distribution
+  // Category distribution with canonical mapping
   const categoryStats = useMemo(() => {
     const map: Record<string, number> = {}
     items.forEach((item) => {
-      map[item.category] = (map[item.category] || 0) + 1
+      const cat = canonicalCategory(item.category)
+      map[cat] = (map[cat] || 0) + 1
     })
     return Object.entries(map).sort((a, b) => b[1] - a[1])
   }, [items])
@@ -47,7 +49,7 @@ export function AdminPage() {
       if (search && !item.title.toLowerCase().includes(search.toLowerCase()) && !item.description.toLowerCase().includes(search.toLowerCase())) {
         return false
       }
-      if (selectedCategory && item.category !== selectedCategory) return false
+      if (selectedCategory && canonicalCategory(item.category) !== canonicalCategory(selectedCategory)) return false
       if (statusFilter && item.status !== statusFilter) return false
       return true
     })
@@ -65,7 +67,7 @@ export function AdminPage() {
 
   return (
     <AdminAuthGate>
-      <div className="min-h-screen bg-[#050b14] text-[#e2e8f0] flex flex-col font-body">
+      <div className="relative min-h-screen text-[#e2e8f0] flex flex-col font-body">
         <Navbar />
 
       <main className="flex-1 mx-auto max-w-[1440px] w-full px-4 py-8 md:px-8">

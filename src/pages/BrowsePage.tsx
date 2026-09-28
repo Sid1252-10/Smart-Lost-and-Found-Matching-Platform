@@ -7,6 +7,7 @@ import { Navbar } from '../components/Navbar'
 import { Footer } from '../components/Footer'
 import { AuthModal } from '../components/AuthModal'
 import { CATEGORIES, ISLANDS } from '../data/catalog'
+import { canonicalCategory } from '../lib/categories'
 import { useRegistry } from '../context/RegistryContext'
 import type { RegistryItem } from '../types'
 import { Compass, Map as MapIcon, RotateCcw, Search } from 'lucide-react'
@@ -26,11 +27,11 @@ export function BrowsePage() {
   // Sync if URL query param changes
   useEffect(() => {
     const loc = searchParams.get('location')
-    if (loc) {
+    if (loc !== null) {
       setLocationId(loc)
     }
     const q = searchParams.get('q')
-    if (q) {
+    if (q !== null) {
       setSearchQuery(q)
     }
   }, [searchParams])
@@ -58,17 +59,18 @@ export function BrowsePage() {
           return false
         }
       }
-      // Category filter
-      if (category && item.category !== category) return false
+      // Category filter (canonical matching)
+      if (category && canonicalCategory(item.category) !== canonicalCategory(category)) return false
       // Kind filter
       if (kind !== 'all' && item.kind !== kind) return false
       // Search query
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase()
-        const matchTitle = item.title.toLowerCase().includes(q)
+        const matchTitle = item.title?.toLowerCase().includes(q)
         const matchDesc = item.description?.toLowerCase().includes(q)
-        const matchLoc = item.location.toLowerCase().includes(q)
-        if (!matchTitle && !matchDesc && !matchLoc) return false
+        const matchLoc = item.location?.toLowerCase().includes(q)
+        const matchCat = canonicalCategory(item.category).toLowerCase().includes(q)
+        if (!matchTitle && !matchDesc && !matchLoc && !matchCat) return false
       }
       return true
     })
@@ -91,7 +93,7 @@ export function BrowsePage() {
   }, [locationId])
 
   return (
-    <div className="min-h-screen bg-[#060b14] text-[#e2e8f0] flex flex-col">
+    <div className="relative min-h-screen text-[#e2e8f0] flex flex-col font-body">
       <Navbar onAuthClick={() => setAuthOpen(true)} />
 
       <main className="flex-1 flex flex-col px-4 py-6 md:px-8 max-w-[1440px] mx-auto w-full">
@@ -264,7 +266,7 @@ export function BrowsePage() {
                   </div>
                   <div className="mt-2 flex items-center gap-1.5 text-[11px] text-slate-400">
                     <span className="rounded bg-black/50 px-1.5 py-0.5 text-[10px] text-slate-300 border border-slate-700/50">
-                      {item.category}
+                      {canonicalCategory(item.category)}
                     </span>
                     {item.colour && (
                       <span className="rounded bg-black/50 px-1.5 py-0.5 text-[10px] text-slate-400 border border-slate-700/50">

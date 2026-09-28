@@ -1,9 +1,9 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { X } from 'lucide-react'
-import { useAuth } from '../context/AuthContext'
 import { useRegistry } from '../context/RegistryContext'
 import type { MatchResult, RegistryItem } from '../types'
 import { ItemThumb, StatusTag } from './ItemArt'
+import { canonicalCategory } from '../lib/categories'
 
 type MatchResultsModalProps = {
   open: boolean
@@ -78,8 +78,7 @@ type ItemDetailModalProps = {
 }
 
 export function ItemDetailModal({ item, onClose }: ItemDetailModalProps) {
-  const { user } = useAuth()
-  const { items, claimItem, recoverItem } = useRegistry()
+  const { items, recoverItem } = useRegistry()
   const live = (item && items.find((entry) => entry.id === item.id)) || item
 
   return (
@@ -120,7 +119,7 @@ export function ItemDetailModal({ item, onClose }: ItemDetailModalProps) {
             <p className="text-xs leading-relaxed text-slate-200 font-body">{live.description}</p>
 
             <dl className="mt-4 grid grid-cols-2 gap-2 text-xs text-slate-300 font-body border-t border-slate-800 pt-3">
-              <div><strong className="text-slate-400">Category:</strong> {live.category}</div>
+              <div><strong className="text-slate-400">Category:</strong> {canonicalCategory(live.category)}</div>
               <div><strong className="text-slate-400">Type:</strong> {live.kind.toUpperCase()}</div>
               <div><strong className="text-slate-400">Colour:</strong> {live.colour || 'N/A'}</div>
               <div><strong className="text-slate-400">Marks:</strong> {live.uniqueMarks || 'None'}</div>
@@ -128,21 +127,26 @@ export function ItemDetailModal({ item, onClose }: ItemDetailModalProps) {
               <div><strong className="text-slate-400">Date:</strong> {live.incidentDate || live.dateLost || live.dateFound || 'Recent'}</div>
             </dl>
 
-            <div className="mt-5 flex flex-wrap gap-2 font-heading">
+            <div className="mt-5 flex flex-wrap gap-2 font-body">
               {live.status !== 'CLAIMED' && live.status !== 'RECOVERED' && (
-                <button
-                  type="button"
-                  onClick={() => claimItem(live.id, user?.name || 'Anonymous Captain')}
-                  className="flex-1 rounded-xl bg-gradient-to-r from-[#d4a843] to-[#b88a2e] py-2 text-xs font-bold text-black hover:brightness-110"
+                <a
+                  href={`/claiming?item=${live.id}`}
+                  className="flex-1 text-center rounded-xl bg-gradient-to-r from-[#d4a843] to-[#b88a2e] py-2 text-xs font-bold text-black hover:brightness-110 shadow-md"
                 >
-                  File a Claim
-                </button>
+                  File Claim at Desk
+                </a>
               )}
+              <a
+                href="/treasury"
+                className="flex-1 text-center rounded-xl border border-[#d4a843]/50 bg-[#d4a843]/15 py-2 text-xs font-bold text-[#f0d060] hover:bg-[#d4a843]/25"
+              >
+                Find Smart Matches
+              </a>
               {live.status !== 'RECOVERED' && (
                 <button
                   type="button"
                   onClick={() => recoverItem(live.id)}
-                  className="flex-1 rounded-xl border border-emerald-500/50 bg-emerald-500/20 py-2 text-xs font-bold text-emerald-300 hover:bg-emerald-500/30"
+                  className="rounded-xl border border-emerald-500/50 bg-emerald-500/20 px-3 py-2 text-xs font-bold text-emerald-300 hover:bg-emerald-500/30"
                 >
                   Mark Recovered
                 </button>

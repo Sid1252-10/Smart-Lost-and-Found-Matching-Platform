@@ -47,7 +47,28 @@ ALTER TABLE claims ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow public read on reports" ON reports FOR SELECT USING (true);
 CREATE POLICY "Allow public insert on reports" ON reports FOR INSERT WITH CHECK (true);
 CREATE POLICY "Allow public update on reports" ON reports FOR UPDATE USING (true);
+CREATE POLICY "Allow public delete on reports" ON reports FOR DELETE USING (true);
 
 CREATE POLICY "Allow public read on claims" ON claims FOR SELECT USING (true);
 CREATE POLICY "Allow public insert on claims" ON claims FOR INSERT WITH CHECK (true);
 CREATE POLICY "Allow public update on claims" ON claims FOR UPDATE USING (true);
+CREATE POLICY "Allow public delete on claims" ON claims FOR DELETE USING (true);
+
+-- 5. Storage Bucket for Treasure & Proof Images
+INSERT INTO storage.buckets (id, name, public) 
+VALUES ('treasure-images', 'treasure-images', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- Storage RLS: Allow public access to view and upload images
+CREATE POLICY "Public Read Access on treasure-images"
+ON storage.objects FOR SELECT
+USING (bucket_id = 'treasure-images');
+
+CREATE POLICY "Public Upload Access on treasure-images"
+ON storage.objects FOR INSERT
+WITH CHECK (bucket_id = 'treasure-images');
+
+CREATE POLICY "Public Update Access on treasure-images"
+ON storage.objects FOR UPDATE
+USING (bucket_id = 'treasure-images');
+

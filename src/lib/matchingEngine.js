@@ -4,6 +4,7 @@
 // ============================================================
 
 import { groveDistance } from "./sabaodyMap";
+import { canonicalCategory } from "./categories";
 
 // ──────────────────────────── HELPERS ────────────────────────────
 
@@ -12,6 +13,9 @@ const STOP_WORDS = new Set([
   "with", "of", "by", "from", "is", "was", "it", "this", "that", "lost",
   "found", "some", "very", "has", "have", "had", "my", "your", "his",
   "her", "its", "near", "been", "while", "after", "looks", "like",
+  "none", "small", "large", "piece", "item", "items", "standard",
+  "marks", "marking", "markings", "color", "colour", "unique", "details",
+  "holds", "contains", "found", "around", "about", "also", "into", "onto",
 ]);
 
 /**
@@ -19,7 +23,7 @@ const STOP_WORDS = new Set([
  */
 function tokenize(text) {
   return new Set(
-    text
+    (text || "")
       .toLowerCase()
       .replace(/[^a-z0-9\s]/g, " ")
       .split(/\s+/)
@@ -44,34 +48,38 @@ function jaccardSimilarity(setA, setB) {
  * Factor 1: Category Match (max 35 pts)
  */
 function scoreCategory(lost, found) {
-  if (lost.category === found.category) {
+  const catLost = canonicalCategory(lost.category);
+  const catFound = canonicalCategory(found.category);
+
+  if (catLost === catFound) {
     return {
       score: 35,
-      badge: `Exact Category Match: ${lost.category} (+35)`,
+      badge: `Category: ${catLost}`,
+      categoryName: catLost,
     };
   }
-  return { score: 0, badge: `Category Mismatch (+0)` };
+  return { score: 0, badge: `Different Categories`, categoryName: catLost };
 }
 
 /**
  * Factor 2: Grove Proximity (max 25 pts)
  */
 function scoreLocation(lost, found) {
-  const dist = groveDistance(lost.groveNumber, found.groveNumber);
+  const dist = groveDistance(lost.groveNumber || 41, found.groveNumber || 41);
 
   if (dist === 0) {
-    return { score: 25, badge: `Same Grove ${lost.groveNumber} (+25)` };
+    return { score: 25, badge: `Same Location (Grove ${lost.groveNumber || 41})` };
   }
   if (dist <= 3) {
-    return { score: 22, badge: `Nearby: ${dist} groves apart (+22)` };
+    return { score: 22, badge: `Nearby (${dist} Groves apart)` };
   }
   if (dist <= 8) {
-    return { score: 16, badge: `Same Sector: ${dist} groves apart (+16)` };
+    return { score: 16, badge: `Same Sector (${dist} Groves apart)` };
   }
   if (dist <= 15) {
-    return { score: 10, badge: `Adjacent Zone: ${dist} groves apart (+10)` };
+    return { score: 10, badge: `Adjacent Zone (${dist} Groves apart)` };
   }
-  return { score: 3, badge: `Distant: ${dist} groves apart (+3)` };
+  return { score: 3, badge: `Grand Line Vicinity (${dist} Groves apart)` };
 }
 
 /**
@@ -79,38 +87,41 @@ function scoreLocation(lost, found) {
  */
 function scoreTime(lost, found) {
   const msPerDay = 86400000;
-  const diffDays = Math.abs(
-    new Date(lost.incidentDate).getTime() - new Date(found.incidentDate).getTime()
-  ) / msPerDay;
+  const dateLost = new Date(lost.incidentDate || lost.dateLost || Date.now()).getTime();
+  const dateFound = new Date(found.incidentDate || found.dateFound || Date.now()).getTime();
+  const diffDays = Math.abs(dateLost - dateFound) / msPerDay;
 
   if (diffDays <= 1) {
-    return { score: 15, badge: `Same 24h Window (+15)` };
+    return { score: 15, badge: `Timeline: Reported within 24 hours` };
   }
   if (diffDays <= 3) {
-    return { score: 12, badge: `Within 3 Days (+12)` };
+    return { score: 12, badge: `Timeline: Within 3 days` };
   }
   if (diffDays <= 7) {
-    return { score: 8, badge: `Within 1 Week (+8)` };
+    return { score: 8, badge: `Timeline: Within 1 week` };
   }
-  return { score: 3, badge: `Over 1 Week Apart (+3)` };
+  return { score: 3, badge: `Timeline: Over 1 week apart` };
 }
 
 /**
  * Factor 4: Keyword / Description Similarity (max 25 pts)
  */
 function scoreKeywords(lost, found) {
-  const lostTokens = tokenize(`${lost.title} ${lost.description}`);
-  const foundTokens = tokenize(`${found.title} ${found.description}`);
+  const lostTokens = tokenize(`${lost.title || ""} ${lost.description || ""} ${lost.uniqueMarks || ""}`);
+  const foundTokens = tokenize(`${found.title || ""} ${found.description || ""} ${found.uniqueMarks || ""}`);
   const { score: jaccard, sharedTokens } = jaccardSimilarity(lostTokens, foundTokens);
 
   // Scale jaccard (0-1) up to 25 pts with a boost factor
   const pts = Math.min(25, Math.round(jaccard * 45));
 
   if (sharedTokens.length > 0) {
-    const preview = sharedTokens.slice(0, 4).map((t) => `'${t}'`).join(", ");
-    return { score: pts, badge: `Shared Clues: ${preview} (+${pts})` };
+    const preview = sharedTokens
+      .slice(0, 4)
+      .map((t) => t.charAt(0).toUpperCase() + t.slice(1))
+      .join(", ");
+    return { score: pts, badge: `Distinctive Clues: ${preview}`, sharedTokens };
   }
-  return { score: pts, badge: `No Shared Keywords (+0)` };
+  return { score: pts, badge: `No Shared Keywords (Inspection Required)`, sharedTokens: [] };
 }
 
 // ──────────────────────────── PUBLIC API ────────────────────────────
@@ -128,7 +139,29 @@ export function computeMatchScore(lostReport, foundReport) {
   const time = scoreTime(lostReport, foundReport);
   const kw = scoreKeywords(lostReport, foundReport);
 
-  const totalScore = Math.min(100, cat.score + loc.score + time.score + kw.score);
+  let rawScore = cat.score + loc.score + time.score + kw.score;
+
+  // 1. PHYSICAL KEYWORD GUARD:
+  // If reports share 0 distinctive keywords/clues, cap score at 38 so random coincidences never match!
+  if (!kw.sharedTokens || kw.sharedTokens.length === 0) {
+    rawScore = Math.min(rawScore, 38);
+  }
+
+  // 2. COLOR COMPATIBILITY:
+  const colorA = (lostReport.colour || "").trim().toLowerCase();
+  const colorB = (foundReport.colour || "").trim().toLowerCase();
+  const isGeneric = (c) => !c || c === "standard" || c === "none" || c === "any" || c === "unknown";
+
+  if (!isGeneric(colorA) && !isGeneric(colorB)) {
+    if (colorA === colorB) {
+      rawScore = Math.min(100, rawScore + 8);
+    } else {
+      // Conflicting colors penalize score heavily (-20 pts)
+      rawScore = Math.max(0, rawScore - 20);
+    }
+  }
+
+  const totalScore = Math.max(0, Math.min(100, rawScore));
 
   let confidenceTier = "LOW";
   if (totalScore >= 85) confidenceTier = "LEGENDARY";
@@ -157,16 +190,16 @@ export function computeMatchScore(lostReport, foundReport) {
  *
  * @param {Array} lostList
  * @param {Array} foundList
- * @param {number} [minScore=35]
+ * @param {number} [minScore=55]
  * @returns {Array} sorted match results (highest first)
  */
-export function rankAllMatches(lostList, foundList, minScore = 35) {
+export function rankAllMatches(lostList, foundList, minScore = 55) {
   const results = [];
 
   for (const lost of lostList) {
     for (const found of foundList) {
-      // Must be same category: comparing across different categories is irrelevant
-      if (lost.category !== found.category) continue;
+      // Must be same category: strictly matching across equivalent categories
+      if (canonicalCategory(lost.category) !== canonicalCategory(found.category)) continue;
 
       const match = computeMatchScore(lost, found);
       if (match.score >= minScore) {
@@ -188,7 +221,10 @@ export function rankAllMatches(lostList, foundList, minScore = 35) {
  */
 export function compareAnyTwo(reportA, reportB) {
   // Enforce: one must be LOST and one must be FOUND
-  if (reportA.type === reportB.type) {
+  const isLostA = String(reportA.type || reportA.kind).toUpperCase() === 'LOST';
+  const isLostB = String(reportB.type || reportB.kind).toUpperCase() === 'LOST';
+
+  if (isLostA === isLostB) {
     return {
       matchId: `CMP-${reportA.id}-${reportB.id}`,
       reportA,
@@ -197,7 +233,7 @@ export function compareAnyTwo(reportA, reportB) {
       confidenceTier: "LOW",
       sameType: true,
       matchBadges: [
-        "Cannot match: both reports are " + reportA.type + ". Select one LOST and one FOUND report.",
+        `Cannot match: both reports are ${isLostA ? 'LOST' : 'FOUND'}. Select one LOST and one FOUND report.`,
       ],
       breakdown: { categoryScore: 0, locationScore: 0, timeScore: 0, keywordScore: 0, totalScore: 0 },
       error: true,
@@ -205,7 +241,9 @@ export function compareAnyTwo(reportA, reportB) {
   }
 
   // Enforce: Category must match
-  if (reportA.category !== reportB.category) {
+  const catA = canonicalCategory(reportA.category);
+  const catB = canonicalCategory(reportB.category);
+  if (catA !== catB) {
     return {
       matchId: `CMP-${reportA.id}-${reportB.id}`,
       reportA,
@@ -214,7 +252,7 @@ export function compareAnyTwo(reportA, reportB) {
       confidenceTier: "LOW",
       sameType: false,
       matchBadges: [
-        `Category mismatch: "${reportA.category}" vs "${reportB.category}". Cannot match items of different categories.`,
+        `Category mismatch: "${catA}" vs "${catB}". Please choose items in the same relic category.`,
       ],
       breakdown: { categoryScore: 0, locationScore: 0, timeScore: 0, keywordScore: 0, totalScore: 0 },
       error: true,
@@ -261,23 +299,26 @@ export function compareAnyTwo(reportA, reportB) {
  * @param {number} [limit=10] - Max number of results
  * @returns {Array} sorted match results
  */
-export function findBestMatchesForReport(targetReport, allReports, minScore = 35, limit = 10) {
-  const oppositeType = targetReport.type === "LOST" ? "FOUND" : "LOST";
-  // Filter by opposite type AND exact same category
-  const candidates = allReports.filter(
-    (r) =>
-      r.type === oppositeType &&
+export function findBestMatchesForReport(targetReport, allReports, minScore = 55, limit = 10) {
+  const targetIsLost = String(targetReport.type || targetReport.kind).toUpperCase() === "LOST";
+  const targetCategory = canonicalCategory(targetReport.category);
+
+  // Filter by opposite type AND exact same canonical category
+  const candidates = allReports.filter((r) => {
+    const isLost = String(r.type || r.kind).toUpperCase() === "LOST";
+    return (
+      isLost !== targetIsLost &&
       r.status !== "RECOVERED" &&
       r.id !== targetReport.id &&
-      r.category === targetReport.category
-  );
+      canonicalCategory(r.category) === targetCategory
+    );
+  });
 
   const results = [];
   for (const candidate of candidates) {
-    const match = computeMatchScore(
-      targetReport.type === "LOST" ? targetReport : candidate,
-      targetReport.type === "FOUND" ? targetReport : candidate
-    );
+    const lostItem = targetIsLost ? targetReport : candidate;
+    const foundItem = targetIsLost ? candidate : targetReport;
+    const match = computeMatchScore(lostItem, foundItem);
     if (match.score >= minScore) {
       results.push(match);
     }

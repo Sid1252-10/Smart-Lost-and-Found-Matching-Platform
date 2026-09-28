@@ -83,9 +83,9 @@ export function RegistryProvider({ children }: { children: ReactNode }) {
       createdAt: new Date().toISOString(),
     }
 
-    // 1. Calculate smart matches immediately (strictly same-category!)
+    // 1. Calculate smart matches immediately (strictly same-category and minScore >= 55!)
     const currentList = items
-    const matches = findBestMatchesForReport(newItem, currentList, 30, 5)
+    const matches = findBestMatchesForReport(newItem, currentList, 55, 5)
 
     if (matches.length > 0) {
       newItem.status = 'POTENTIAL_MATCH'

@@ -1,11 +1,7 @@
-export const CATEGORIES = [
-  'Bags & Luggage',
-  'Swords & Gear',
-  'Navigation Instruments',
-  'Apparel & Accessories',
-  'Devil Fruits & Relics',
-  'Jewelry & Treasure',
-] as const
+import { ALL_CATEGORY_LABELS, CANONICAL_CATEGORIES, canonicalCategory } from '../lib/categories'
+
+export { CANONICAL_CATEGORIES, canonicalCategory }
+export const CATEGORIES = ALL_CATEGORY_LABELS
 
 export const COLOURS = [
   'Black',
