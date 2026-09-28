@@ -15,7 +15,7 @@ export function ContactPage() {
 
   return (
     <div className="relative min-h-screen">
-      <GrandLineMap selectedId="sabaody" onSelect={() => undefined} />
+      <GrandLineMap variant="background" selectedId="sabaody" onSelect={() => undefined} />
       <div className="relative z-20">
         <Navbar onAuthClick={() => setAuthOpen(true)} />
         <form onSubmit={onSubmit} className="glass-panel mx-4 mb-10 max-w-xl rounded-2xl p-6 md:mx-8">
