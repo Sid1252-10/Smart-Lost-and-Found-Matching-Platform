@@ -1,10 +1,14 @@
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { X, Trash2 } from 'lucide-react'
+import { X, Trash2, ZoomIn, Award } from 'lucide-react'
 import { useRegistry } from '../context/RegistryContext'
 import type { MatchResult, RegistryItem } from '../types'
 import { ItemThumb, StatusTag } from './ItemArt'
 import { canonicalCategory } from '../lib/categories'
+import { ImageZoomModal } from './ImageZoomModal'
+import { ClaimVerificationModal } from './ClaimVerificationModal'
+import { RecoveredStampCelebration, type RecoveredCelebrationState } from './RecoveredStampCelebration'
+import { fireTreasureConfetti } from '../lib/confetti'
 
 type MatchResultsModalProps = {
   open: boolean
@@ -82,100 +86,163 @@ export function ItemDetailModal({ item, onClose }: ItemDetailModalProps) {
   const { items, recoverItem, deleteItem } = useRegistry()
   const live = (item && items.find((entry) => entry.id === item.id)) || item
   const [isDeleting, setIsDeleting] = useState(false)
+  const [showImageZoom, setShowImageZoom] = useState(false)
+  const [showClaimModal, setShowClaimModal] = useState(false)
+  const [celebrationState, setCelebrationState] = useState<RecoveredCelebrationState>({
+    isOpen: false,
+    title: '',
+  })
 
   return (
-    <AnimatePresence>
-      {live && (
-        <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/75 px-4"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-        >
+    <>
+      <AnimatePresence>
+        {live && (
           <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            className="glass-panel w-full max-w-lg rounded-2xl p-5"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/75 px-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
           >
-            <div className="mb-3 flex items-start justify-between">
-              <div>
-                <StatusTag status={live.status} />
-                <h3 className="mt-2 font-pirate text-3xl text-white">{live.title}</h3>
-                <p className="text-xs text-slate-400 font-body">
-                  {live.location} {live.groveNumber ? `• Grove ${live.groveNumber}` : ''}
-                </p>
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              className="glass-panel w-full max-w-lg rounded-2xl p-5"
+            >
+              <div className="mb-3 flex items-start justify-between">
+                <div>
+                  <StatusTag status={live.status} />
+                  <h3 className="mt-2 font-pirate text-3xl text-white">{live.title}</h3>
+                  <p className="text-xs text-slate-400 font-body">
+                    {live.location} {live.groveNumber ? `• Grove ${live.groveNumber}` : ''}
+                  </p>
+                </div>
+                <button type="button" onClick={onClose} className="text-slate-400 hover:text-white">
+                  <X className="h-5 w-5" />
+                </button>
               </div>
-              <button type="button" onClick={onClose} className="text-slate-400 hover:text-white">
-                <X className="h-5 w-5" />
-              </button>
-            </div>
 
-            <div className="mb-4 h-48 overflow-hidden rounded-xl bg-black/60 border border-[#d4a843]/30 flex items-center justify-center">
-              {live.imageUrl ? (
-                <img src={live.imageUrl} alt={live.title} className="h-full w-full object-cover" />
-              ) : (
-                <ItemThumb title={live.title} />
-              )}
-            </div>
-
-            <p className="text-xs leading-relaxed text-slate-200 font-body">{live.description}</p>
-
-            <dl className="mt-4 grid grid-cols-2 gap-2 text-xs text-slate-300 font-body border-t border-slate-800 pt-3">
-              <div><strong className="text-slate-400">Category:</strong> {canonicalCategory(live.category)}</div>
-              <div><strong className="text-slate-400">Type:</strong> {live.kind.toUpperCase()}</div>
-              <div><strong className="text-slate-400">Colour:</strong> {live.colour || 'N/A'}</div>
-              <div><strong className="text-slate-400">Marks:</strong> {live.uniqueMarks || 'None'}</div>
-              <div><strong className="text-slate-400">Grove:</strong> Grove {live.groveNumber || 41}</div>
-              <div><strong className="text-slate-400">Date:</strong> {live.incidentDate || live.dateLost || live.dateFound || 'Recent'}</div>
-            </dl>
-
-            <div className="mt-5 flex flex-wrap gap-2 font-body">
-              {live.status !== 'CLAIMED' && live.status !== 'RECOVERED' && (
-                <a
-                  href={`/claiming?item=${live.id}`}
-                  className="flex-1 text-center rounded-xl bg-gradient-to-r from-[#d4a843] to-[#b88a2e] py-2 text-xs font-bold text-black hover:brightness-110 shadow-md"
-                >
-                  File Claim at Desk
-                </a>
-              )}
-              <a
-                href="/treasury"
-                className="flex-1 text-center rounded-xl border border-[#d4a843]/50 bg-[#d4a843]/15 py-2 text-xs font-bold text-[#f0d060] hover:bg-[#d4a843]/25"
+              {/* Interactive Image with Zoom Inspection */}
+              <div
+                className={`group relative mb-4 h-48 overflow-hidden rounded-xl bg-black/60 border border-[#d4a843]/30 flex items-center justify-center ${
+                  live.imageUrl ? 'cursor-pointer hover:border-[#f0d060]' : ''
+                }`}
+                onClick={() => {
+                  if (live.imageUrl) setShowImageZoom(true)
+                }}
+                title={live.imageUrl ? 'Click to inspect in High-Res Zoom' : undefined}
               >
-                Find Smart Matches
-              </a>
-              {live.status !== 'RECOVERED' && (
+                {live.imageUrl ? (
+                  <>
+                    <img
+                      src={live.imageUrl}
+                      alt={live.title}
+                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5 text-xs text-[#f0d060] font-heading backdrop-blur-[2px]">
+                      <ZoomIn className="h-4 w-4" />
+                      <span>Inspect with High-Res Zoom</span>
+                    </div>
+                  </>
+                ) : (
+                  <ItemThumb title={live.title} />
+                )}
+              </div>
+
+              <p className="text-xs leading-relaxed text-slate-200 font-body">{live.description}</p>
+
+              <dl className="mt-4 grid grid-cols-2 gap-2 text-xs text-slate-300 font-body border-t border-slate-800 pt-3">
+                <div><strong className="text-slate-400">Category:</strong> {canonicalCategory(live.category)}</div>
+                <div><strong className="text-slate-400">Type:</strong> {live.kind.toUpperCase()}</div>
+                <div><strong className="text-slate-400">Colour:</strong> {live.colour || 'N/A'}</div>
+                <div><strong className="text-slate-400">Marks:</strong> {live.uniqueMarks || 'None'}</div>
+                <div><strong className="text-slate-400">Grove:</strong> Grove {live.groveNumber || 41}</div>
+                <div><strong className="text-slate-400">Date:</strong> {live.incidentDate || live.dateLost || live.dateFound || 'Recent'}</div>
+              </dl>
+
+              <div className="mt-5 flex flex-wrap gap-2 font-body">
+                {live.status !== 'CLAIMED' && live.status !== 'RECOVERED' && (
+                  <button
+                    type="button"
+                    onClick={() => setShowClaimModal(true)}
+                    className="flex-1 text-center rounded-xl bg-gradient-to-r from-[#d4a843] to-[#b88a2e] py-2 text-xs font-bold text-black hover:brightness-110 shadow-md font-heading"
+                  >
+                    Two-Step Claim Verification
+                  </button>
+                )}
+                <a
+                  href="/treasury"
+                  className="flex-1 text-center rounded-xl border border-[#d4a843]/50 bg-[#d4a843]/15 py-2 text-xs font-bold text-[#f0d060] hover:bg-[#d4a843]/25"
+                >
+                  Find Smart Matches
+                </a>
+                {live.status !== 'RECOVERED' && (
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      await recoverItem(live.id)
+                      fireTreasureConfetti()
+                      setCelebrationState({ isOpen: true, title: live.title })
+                    }}
+                    className="rounded-xl border border-emerald-500/50 bg-emerald-500/20 px-3 py-2 text-xs font-bold text-emerald-300 hover:bg-emerald-500/30 flex items-center gap-1.5 transition"
+                    title="Mark Recovered with Official Stamp"
+                  >
+                    <Award className="h-3.5 w-3.5" />
+                    <span>Recovered Stamp</span>
+                  </button>
+                )}
                 <button
                   type="button"
-                  onClick={() => recoverItem(live.id)}
-                  className="rounded-xl border border-emerald-500/50 bg-emerald-500/20 px-3 py-2 text-xs font-bold text-emerald-300 hover:bg-emerald-500/30"
+                  disabled={isDeleting}
+                  onClick={async () => {
+                    if (window.confirm(`Are you sure you want to permanently delete "${live.title}"?`)) {
+                      setIsDeleting(true)
+                      await deleteItem(live.id)
+                      setIsDeleting(false)
+                      onClose()
+                    }
+                  }}
+                  className="rounded-xl border border-red-500/50 bg-red-500/20 px-3 py-2 text-xs font-bold text-red-300 hover:bg-red-500/30 transition flex items-center gap-1.5"
+                  title="Delete this record"
                 >
-                  Mark Recovered
+                  <Trash2 className="h-3.5 w-3.5" />
+                  <span>{isDeleting ? 'Deleting...' : 'Delete'}</span>
                 </button>
-              )}
-              <button
-                type="button"
-                disabled={isDeleting}
-                onClick={async () => {
-                  if (window.confirm(`Are you sure you want to permanently delete "${live.title}"?`)) {
-                    setIsDeleting(true)
-                    await deleteItem(live.id)
-                    setIsDeleting(false)
-                    onClose()
-                  }
-                }}
-                className="rounded-xl border border-red-500/50 bg-red-500/20 px-3 py-2 text-xs font-bold text-red-300 hover:bg-red-500/30 transition flex items-center gap-1.5"
-                title="Delete this record"
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-                <span>{isDeleting ? 'Deleting...' : 'Delete'}</span>
-              </button>
-            </div>
-            {live.claimedBy && <p className="mt-3 text-xs text-emerald-300 font-body">Claim filed by {live.claimedBy}</p>}
+              </div>
+              {live.claimedBy && <p className="mt-3 text-xs text-emerald-300 font-body">Claim filed by {live.claimedBy}</p>}
+            </motion.div>
           </motion.div>
-        </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Bonus Feature 1: Interactive Image Zoom Modal */}
+      {live && live.imageUrl && (
+        <ImageZoomModal
+          isOpen={showImageZoom}
+          imageUrl={live.imageUrl}
+          title={live.title}
+          location={live.location}
+          groveNumber={live.groveNumber}
+          category={canonicalCategory(live.category)}
+          incidentDate={live.incidentDate || live.dateLost || live.dateFound}
+          onClose={() => setShowImageZoom(false)}
+        />
       )}
-    </AnimatePresence>
+
+      {/* Bonus Feature 2: Two-Step Claim Verification Modal */}
+      {live && (
+        <ClaimVerificationModal
+          item={live}
+          isOpen={showClaimModal}
+          onClose={() => setShowClaimModal(false)}
+        />
+      )}
+
+      {/* Bonus Feature 3: One-Click Recovered Stamp with Confetti */}
+      <RecoveredStampCelebration
+        state={celebrationState}
+        onClose={() => setCelebrationState({ isOpen: false, title: '' })}
+      />
+    </>
   )
 }
 

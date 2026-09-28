@@ -21,6 +21,10 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useRegistry } from '../context/RegistryContext'
 import { rankAllMatches, compareAnyTwo } from '../lib/matchingEngine'
 import { canonicalCategory } from '../lib/categories'
+import { MatchScoreBreakdown } from '../components/MatchScoreBreakdown'
+import { ImageZoomModal } from '../components/ImageZoomModal'
+import { ClaimVerificationModal } from '../components/ClaimVerificationModal'
+import type { RegistryItem } from '../types'
 
 export function TreasuryPage() {
   const { items } = useRegistry()
@@ -29,6 +33,15 @@ export function TreasuryPage() {
   const [selectedFoundId, setSelectedFoundId] = useState<string>('')
   const [manualResult, setManualResult] = useState<any>(null)
   const [inspectingMatch, setInspectingMatch] = useState<any>(null)
+  const [claimModalItem, setClaimModalItem] = useState<RegistryItem | null>(null)
+  const [zoomData, setZoomData] = useState<{
+    isOpen: boolean
+    imageUrl: string
+    title: string
+    location?: string
+    category?: string
+    incidentDate?: string
+  }>({ isOpen: false, imageUrl: '', title: '' })
 
   // Live real data metrics
   const totalReports = items.length
@@ -296,6 +309,17 @@ export function TreasuryPage() {
                       </div>
                     </div>
 
+                    {/* Interactive 4-Factor Percentage Breakdown */}
+                    <div className="mt-3">
+                      <MatchScoreBreakdown
+                        compact
+                        score={match.score}
+                        confidenceTier={match.confidenceTier}
+                        breakdown={match.breakdown}
+                        matchBadges={match.matchBadges}
+                      />
+                    </div>
+
                     {/* Bottom Row: Clean Intelligence Badges & Actions */}
                     <div className="mt-4 pt-3 border-t border-slate-800 flex flex-wrap items-center justify-between gap-3">
                       <div className="flex flex-wrap items-center gap-2">
@@ -303,27 +327,6 @@ export function TreasuryPage() {
                           <Tag className="h-3 w-3 text-[#f0d060]" />
                           {canonicalCategory(lost?.category)}
                         </span>
-
-                        {match.matchBadges &&
-                          match.matchBadges
-                            .filter((b: string) => !b.toLowerCase().includes('category mismatch'))
-                            .map((badge: string, bIdx: number) => (
-                              <span
-                                key={bIdx}
-                                className="flex items-center gap-1 rounded-md bg-slate-800/70 border border-slate-700/60 px-2.5 py-1 text-[11px] text-slate-300"
-                              >
-                                {badge.includes('Grove') || badge.includes('Location') ? (
-                                  <MapPin className="h-3 w-3 text-sky-400" />
-                                ) : badge.includes('Timeline') || badge.includes('Window') ? (
-                                  <Clock className="h-3 w-3 text-amber-400" />
-                                ) : badge.includes('Clues') ? (
-                                  <Search className="h-3 w-3 text-emerald-400" />
-                                ) : (
-                                  <Sparkles className="h-3 w-3 text-[#f0d060]" />
-                                )}
-                                <span>{badge}</span>
-                              </span>
-                            ))}
                       </div>
 
                       <div className="flex items-center gap-2.5">
@@ -335,13 +338,14 @@ export function TreasuryPage() {
                           <Eye className="h-3.5 w-3.5 text-slate-400" />
                           <span>Inspect Evidence</span>
                         </button>
-                        <Link
-                          to={`/claiming?item=${found?.id}`}
-                          className="flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-emerald-500 to-emerald-600 px-4 py-1.5 text-xs font-bold text-black hover:brightness-110 shadow-md transition-all"
+                        <button
+                          type="button"
+                          onClick={() => setClaimModalItem(found || null)}
+                          className="flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-emerald-500 to-emerald-600 px-4 py-1.5 text-xs font-bold text-black hover:brightness-110 shadow-md transition-all font-heading"
                         >
                           <ShieldCheck className="h-3.5 w-3.5" />
-                          <span>Claim Match</span>
-                        </Link>
+                          <span>Two-Step Claim</span>
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -568,26 +572,14 @@ export function TreasuryPage() {
                 </div>
               </div>
 
-              {/* Match Highlights */}
-              <div className="rounded-xl border border-[#d4a843]/30 bg-black/40 p-4 mb-6">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-bold text-[#f0d060] uppercase tracking-wider">
-                    Observation Haki Correlation Badges
-                  </span>
-                  <span className="rounded-full bg-[#d4a843]/20 border border-[#d4a843] px-2.5 py-0.5 text-xs font-bold text-[#f0d060]">
-                    {inspectingMatch.score}% Resonance
-                  </span>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {inspectingMatch.matchBadges?.map((b: string, idx: number) => (
-                    <span
-                      key={idx}
-                      className="rounded bg-slate-800 border border-slate-700 px-2.5 py-1 text-xs text-slate-200"
-                    >
-                      {b}
-                    </span>
-                  ))}
-                </div>
+              {/* Observation Haki 4-Factor Percentage Breakdown */}
+              <div className="mb-6">
+                <MatchScoreBreakdown
+                  score={inspectingMatch.score}
+                  confidenceTier={inspectingMatch.confidenceTier}
+                  breakdown={inspectingMatch.breakdown}
+                  matchBadges={inspectingMatch.matchBadges}
+                />
               </div>
 
               {/* Actions */}
@@ -602,17 +594,37 @@ export function TreasuryPage() {
                 <button
                   type="button"
                   onClick={() => {
-                    navigate(`/claiming?item=${inspectingMatch.foundReport?.id}`)
+                    const target = inspectingMatch.foundReport
+                    setInspectingMatch(null)
+                    setClaimModalItem(target)
                   }}
-                  className="rounded-lg bg-gradient-to-r from-[#d4a843] to-[#b88a2e] px-5 py-2 text-xs font-bold text-black hover:brightness-110 shadow-lg"
+                  className="rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 px-5 py-2 text-xs font-bold text-black hover:brightness-110 shadow-lg font-heading uppercase tracking-wider"
                 >
-                  Proceed to Claim Desk
+                  Two-Step Claim Verification
                 </button>
               </div>
             </div>
           </div>
         )}
       </main>
+
+      {/* Bonus Feature: Interactive Image Zoom Modal */}
+      <ImageZoomModal
+        isOpen={zoomData.isOpen}
+        imageUrl={zoomData.imageUrl}
+        title={zoomData.title}
+        location={zoomData.location}
+        category={zoomData.category}
+        incidentDate={zoomData.incidentDate}
+        onClose={() => setZoomData({ isOpen: false, imageUrl: '', title: '' })}
+      />
+
+      {/* Bonus Feature: Two-Step Claim Verification Modal */}
+      <ClaimVerificationModal
+        item={claimModalItem}
+        isOpen={!!claimModalItem}
+        onClose={() => setClaimModalItem(null)}
+      />
 
       <Footer />
     </div>

@@ -16,6 +16,8 @@ import { canonicalCategory } from '../lib/categories'
 import { StatusTag } from '../components/ItemArt'
 import { ItemDetailModal } from '../components/Modals'
 import { AdminAuthGate } from '../components/AdminAuthGate'
+import { RecoveredStampCelebration, type RecoveredCelebrationState } from '../components/RecoveredStampCelebration'
+import { fireTreasureConfetti } from '../lib/confetti'
 import type { RegistryItem } from '../types'
 
 export function AdminPage() {
@@ -25,6 +27,10 @@ export function AdminPage() {
   const [selectedCategory, setSelectedCategory] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [detailItem, setDetailItem] = useState<RegistryItem | null>(null)
+  const [celebrationState, setCelebrationState] = useState<RecoveredCelebrationState>({
+    isOpen: false,
+    title: '',
+  })
 
   // Analytics Metrics
   const total = items.length
@@ -293,8 +299,12 @@ export function AdminPage() {
 
                           {item.status !== 'RECOVERED' && (
                             <button
-                              onClick={() => recoverItem(item.id)}
-                              title="Mark as RECOVERED"
+                              onClick={async () => {
+                                await recoverItem(item.id)
+                                fireTreasureConfetti()
+                                setCelebrationState({ isOpen: true, title: item.title })
+                              }}
+                              title="Mark as RECOVERED with Official Stamp"
                               className="rounded bg-emerald-500/20 border border-emerald-500/50 px-2 py-0.5 text-[10px] font-bold text-emerald-300 hover:bg-emerald-500/40"
                             >
                               Recover
@@ -352,7 +362,11 @@ export function AdminPage() {
 
                       <div className="flex items-center gap-2 font-heading text-xs">
                         <button
-                          onClick={() => recoverItem(item.id)}
+                          onClick={async () => {
+                            await recoverItem(item.id)
+                            fireTreasureConfetti()
+                            setCelebrationState({ isOpen: true, title: item.title })
+                          }}
                           className="rounded-lg bg-emerald-500 px-3 py-1.5 font-bold text-black hover:bg-emerald-400"
                         >
                           Approve & Recover
@@ -369,6 +383,12 @@ export function AdminPage() {
           </div>
         )}
       </main>
+
+      {/* Recovered stamp confetti celebration */}
+      <RecoveredStampCelebration
+        state={celebrationState}
+        onClose={() => setCelebrationState({ isOpen: false, title: '' })}
+      />
 
       {/* Item detail modal */}
       <ItemDetailModal item={detailItem} onClose={() => setDetailItem(null)} />

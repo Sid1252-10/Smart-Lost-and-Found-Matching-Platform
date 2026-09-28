@@ -1,11 +1,12 @@
 import { useState, useMemo, type FormEvent } from 'react'
 import { Navbar } from '../components/Navbar'
 import { Footer } from '../components/Footer'
-import { ShieldCheck, FileCheck, Send, CheckCircle2, AlertCircle, ArrowLeft, PackageCheck } from 'lucide-react'
+import { ShieldCheck, FileCheck, Send, CheckCircle2, AlertCircle, ArrowLeft, PackageCheck, KeyRound, Sparkles } from 'lucide-react'
 import { useSearchParams, Link } from 'react-router-dom'
 import { ARTIFACTS } from '../components/SelectedArtifacts'
 import { useRegistry } from '../context/RegistryContext'
 import { canonicalCategory } from '../lib/categories'
+import { fireTreasureConfetti } from '../lib/confetti'
 
 export function ClaimingPage() {
   const { items, claimItem } = useRegistry()
@@ -71,9 +72,11 @@ export function ClaimingPage() {
         ownerName,
         `Proof marks: ${uniqueMarks}, Last seen: ${islandLost}, Courier: ${courierMethod}`
       )
+      fireTreasureConfetti()
       setSubmitted(true)
     } catch (err) {
       console.error('Failed to submit claim:', err)
+      fireTreasureConfetti()
       setSubmitted(true)
     } finally {
       setSubmitting(false)
@@ -282,6 +285,41 @@ export function ClaimingPage() {
                   onChange={(e) => setUniqueMarks(e.target.value)}
                   className="w-full rounded-lg border border-[#d4a843]/30 bg-black/50 px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-[#f0d060] transition-colors"
                 />
+
+                {/* Live Anti-Fraud Ownership Strength Barometer */}
+                <div className="mt-2 rounded-lg bg-black/40 border border-slate-800 p-2.5 text-xs">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[11px] text-slate-400 flex items-center gap-1.5">
+                      <KeyRound className="h-3.5 w-3.5 text-[#f0d060]" />
+                      <span>Blind Ownership Verification Strength</span>
+                    </span>
+                    <span
+                      className={`font-mono font-bold ${
+                        uniqueMarks.length > 25
+                          ? 'text-emerald-400'
+                          : uniqueMarks.length > 8
+                          ? 'text-amber-400'
+                          : 'text-slate-500'
+                      }`}
+                    >
+                      {Math.min(100, Math.round((uniqueMarks.length / 40) * 100))}%
+                    </span>
+                  </div>
+                  <div className="h-1.5 w-full bg-slate-900 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full transition-all duration-300 ${
+                        uniqueMarks.length > 25
+                          ? 'bg-emerald-400'
+                          : uniqueMarks.length > 8
+                          ? 'bg-amber-400'
+                          : 'bg-slate-700'
+                      }`}
+                      style={{
+                        width: `${Math.min(100, Math.round((uniqueMarks.length / 40) * 100))}%`,
+                      }}
+                    />
+                  </div>
+                </div>
               </div>
 
               <div className="rounded-xl border border-amber-500/30 bg-amber-950/20 p-3.5 flex gap-3 text-xs text-amber-200">
