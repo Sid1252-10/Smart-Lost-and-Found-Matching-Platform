@@ -1,3 +1,4 @@
+// Footer v2 – Dark ocean theme, no background image
 import { Link } from 'react-router-dom'
 
 export interface FooterProps {
@@ -6,107 +7,132 @@ export interface FooterProps {
 
 export function Footer({ onWorldClick }: FooterProps) {
   return (
-    <footer className="relative w-full overflow-hidden bg-[#2b190d] text-[#2c1b0c] select-none border-t border-[#6d451b]/60">
-      {/* Background container maintaining landscape parchment aspect ratio */}
-      <div className="relative mx-auto max-w-[1440px] aspect-[682/136] w-full min-h-[140px] sm:min-h-[160px] md:min-h-[180px] overflow-hidden">
-        {/* Exact Footer Artwork */}
-        <img
-          src="/extracted/footer_bg.jpg"
-          alt="Treasury Footer Nautical Chart"
-          className="h-full w-full object-cover object-center pointer-events-none"
-        />
+    <footer className="relative w-full overflow-hidden select-none border-t border-[#d4a843]/20"
+      style={{
+        background: 'linear-gradient(180deg, #040810 0%, #0a1628 20%, #0d1f38 50%, #0a1628 80%, #050d18 100%)',
+      }}
+    >
+      {/* Subtle parchment-style top border glow */}
+      <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#d4a843]/40 to-transparent" />
 
-        {/* Interactive Clickable Hotspots overlay matching the text in the image */}
-        {/* Left Column Links: MY REPORTS, CLAIM PORTAL, ARCHIVES, FAQ */}
-        <div
-          style={{
-            position: 'absolute',
-            left: '23.5%',
-            top: '22%',
-            width: '13%',
-            height: '52%',
-          }}
-          className="flex flex-col justify-between"
-        >
-          <Link
-            to="/report"
-            className="h-[22%] w-full rounded hover:bg-black/10 focus:ring-1 focus:ring-amber-800 transition-colors"
-            title="My Reports"
-          />
-          <Link
-            to="/claiming"
-            className="h-[22%] w-full rounded hover:bg-black/10 focus:ring-1 focus:ring-amber-800 transition-colors"
-            title="Claim Portal"
-          />
-          <Link
-            to="/archives"
-            className="h-[22%] w-full rounded hover:bg-black/10 focus:ring-1 focus:ring-amber-800 transition-colors"
-            title="Treasury Archives"
-          />
-          <Link
-            to="/faq"
-            className="h-[22%] w-full rounded hover:bg-black/10 focus:ring-1 focus:ring-amber-800 transition-colors"
-            title="Frequently Asked Questions"
-          />
+      <div className="relative mx-auto max-w-[1440px] px-6 py-10 md:py-14">
+        {/* Decorative compass and anchor corners */}
+        <div className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 text-[#d4a843]/15 text-5xl md:text-7xl select-none pointer-events-none">
+          ⚓
+        </div>
+        <div className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 text-[#d4a843]/15 text-5xl md:text-7xl select-none pointer-events-none">
+          🧭
         </div>
 
-        {/* Center Jolly Roger Skull & Social Crests */}
-        <div
-          style={{
-            position: 'absolute',
-            left: '44%',
-            top: '15%',
-            width: '12%',
-            height: '62%',
-          }}
-          className="group cursor-pointer flex flex-col items-center justify-end"
-          title="Straw Hat Grand Fleet Treasury"
-        >
-          <div className="w-full h-full rounded hover:bg-amber-900/10 transition-colors" />
-        </div>
-
-        {/* Right Column Links: WORLD, NEWS, CONTACT, CONTACT US */}
-        <div
-          style={{
-            position: 'absolute',
-            left: '63.5%',
-            top: '22%',
-            width: '13%',
-            height: '52%',
-          }}
-          className="flex flex-col justify-between"
-        >
-          {onWorldClick ? (
-            <button
-              type="button"
-              onClick={onWorldClick}
-              className="h-[22%] w-full text-left rounded hover:bg-black/10 focus:ring-1 focus:ring-amber-800 transition-colors"
-              title="World Grand Line Map"
-            />
-          ) : (
+        {/* Main footer content grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start text-center md:text-left">
+          {/* Left Column: Navigation Links */}
+          <nav className="flex flex-col items-center md:items-start gap-2.5">
+            <h3 className="font-pirate text-lg text-[#f0d060] tracking-widest mb-1 drop-shadow-[0_1px_6px_rgba(212,168,67,0.3)]">
+              TREASURY
+            </h3>
             <Link
-              to="/world"
-              className="h-[22%] w-full rounded hover:bg-black/10 focus:ring-1 focus:ring-amber-800 transition-colors"
-              title="World Grand Line Map"
-            />
-          )}
-          <Link
-            to="/news"
-            className="h-[22%] w-full rounded hover:bg-black/10 focus:ring-1 focus:ring-amber-800 transition-colors"
-            title="World Economic News"
-          />
-          <Link
-            to="/contact"
-            className="h-[22%] w-full rounded hover:bg-black/10 focus:ring-1 focus:ring-amber-800 transition-colors"
-            title="Contact Treasury"
-          />
-          <Link
-            to="/contact"
-            className="h-[22%] w-full rounded hover:bg-black/10 focus:ring-1 focus:ring-amber-800 transition-colors"
-            title="Contact Us"
-          />
+              to="/report"
+              className="text-[#c4a870] hover:text-[#f0d060] text-sm font-sub tracking-wider transition-colors duration-200"
+            >
+              MY REPORTS
+            </Link>
+            <Link
+              to="/claiming"
+              className="text-[#c4a870] hover:text-[#f0d060] text-sm font-sub tracking-wider transition-colors duration-200"
+            >
+              CLAIM PORTAL
+            </Link>
+            <Link
+              to="/archives"
+              className="text-[#c4a870] hover:text-[#f0d060] text-sm font-sub tracking-wider transition-colors duration-200"
+            >
+              ARCHIVES
+            </Link>
+            <Link
+              to="/faq"
+              className="text-[#c4a870] hover:text-[#f0d060] text-sm font-sub tracking-wider transition-colors duration-200"
+            >
+              FAQ
+            </Link>
+          </nav>
+
+          {/* Center Column: Jolly Roger + Social Links */}
+          <div className="flex flex-col items-center gap-4">
+            {/* Jolly Roger Skull */}
+            <div className="relative">
+              <img
+                src="/extracted/footer_skull.png"
+                alt="Straw Hat Jolly Roger"
+                className="w-16 h-16 md:w-20 md:h-20 object-contain drop-shadow-[0_0_15px_rgba(212,168,67,0.3)]"
+              />
+            </div>
+
+            {/* Social Media Icons */}
+            <div className="flex items-center gap-3">
+              {['📋', '©', '🐌', '🐦', '📺'].map((icon, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  className="w-8 h-8 rounded-full border border-[#d4a843]/40 bg-[#0d1f38]/80 flex items-center justify-center text-xs text-[#d4a843] hover:border-[#f0d060] hover:bg-[#1a2d48] hover:text-[#f0d060] transition-all duration-200 hover:scale-110 hover:shadow-[0_0_10px_rgba(212,168,67,0.3)]"
+                  title="Social Link"
+                >
+                  {icon}
+                </button>
+              ))}
+            </div>
+
+            {/* Copyright */}
+            <p className="text-[10px] md:text-xs text-[#8a7a60] tracking-wider font-body mt-1">
+              © 2024 WORLD OF ONE'S RCE. LOST & FOUND TREASURY. All rights reserved.
+            </p>
+          </div>
+
+          {/* Right Column: More Links */}
+          <nav className="flex flex-col items-center md:items-end gap-2.5">
+            <h3 className="font-pirate text-lg text-[#f0d060] tracking-widest mb-1 drop-shadow-[0_1px_6px_rgba(212,168,67,0.3)]">
+              NAVIGATE
+            </h3>
+            {onWorldClick ? (
+              <button
+                type="button"
+                onClick={onWorldClick}
+                className="text-[#c4a870] hover:text-[#f0d060] text-sm font-sub tracking-wider transition-colors duration-200 bg-transparent border-none cursor-pointer"
+              >
+                WORLD
+              </button>
+            ) : (
+              <Link
+                to="/world"
+                className="text-[#c4a870] hover:text-[#f0d060] text-sm font-sub tracking-wider transition-colors duration-200"
+              >
+                WORLD
+              </Link>
+            )}
+            <Link
+              to="/news"
+              className="text-[#c4a870] hover:text-[#f0d060] text-sm font-sub tracking-wider transition-colors duration-200"
+            >
+              NEWS
+            </Link>
+            <Link
+              to="/contact"
+              className="text-[#c4a870] hover:text-[#f0d060] text-sm font-sub tracking-wider transition-colors duration-200"
+            >
+              CONTACT
+            </Link>
+            <Link
+              to="/contact"
+              className="text-[#c4a870] hover:text-[#f0d060] text-sm font-sub tracking-wider transition-colors duration-200"
+            >
+              CONTACT US
+            </Link>
+          </nav>
         </div>
       </div>
+
+      {/* Bottom edge glow */}
+      <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#d4a843]/20 to-transparent" />
     </footer>
   )
 }
