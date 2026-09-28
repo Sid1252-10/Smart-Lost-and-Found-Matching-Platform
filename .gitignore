@@ -3,3 +3,8 @@ dist/
 .DS_Store
 *.local
 .vscode 
+
+.env
+__pycache__/
+*.pyc
+*.db
