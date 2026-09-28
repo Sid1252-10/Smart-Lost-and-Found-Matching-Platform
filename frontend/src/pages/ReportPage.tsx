@@ -3,6 +3,7 @@ import { GrandLineMap, normalizeIslandId } from '../components/GrandLineMap'
 import { Navbar } from '../components/Navbar'
 import { Footer } from '../components/Footer'
 import { AuthModal } from '../components/AuthModal'
+import { CalendarDatePicker } from '../components/CalendarDatePicker'
 import { CATEGORIES, COLOURS, ISLANDS, UNIQUE_MARKS } from '../data/catalog'
 import { useRegistry } from '../context/RegistryContext'
 import type { ItemKind, MatchResult } from '../types'
@@ -15,6 +16,8 @@ export function ReportPage() {
   const [authOpen, setAuthOpen] = useState(false)
   const [locationId, setLocationId] = useState('water-7')
   const [groveNumber, setGroveNumber] = useState(41)
+  const [reportKind, setReportKind] = useState<ItemKind>('lost')
+  const [incidentDate, setIncidentDate] = useState<string>(() => new Date().toISOString().split('T')[0])
   const [submitted, setSubmitted] = useState<{ id: string; title: string; kind: ItemKind } | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [imagePreview, setImagePreview] = useState<string>('')
@@ -77,6 +80,7 @@ export function ReportPage() {
       }
 
       form.reset()
+      setIncidentDate(new Date().toISOString().split('T')[0])
       setImagePreview('')
     } catch (err) {
       console.error('Failed to submit report:', err)
@@ -189,7 +193,8 @@ export function ReportPage() {
                       type="radio"
                       name="kind"
                       value="lost"
-                      defaultChecked
+                      checked={reportKind === 'lost'}
+                      onChange={() => setReportKind('lost')}
                       className="sr-only"
                     />
                     <span>I Lost a Treasure</span>
@@ -199,6 +204,8 @@ export function ReportPage() {
                       type="radio"
                       name="kind"
                       value="found"
+                      checked={reportKind === 'found'}
+                      onChange={() => setReportKind('found')}
                       className="sr-only"
                     />
                     <span>I Found a Treasure</span>
@@ -266,7 +273,7 @@ export function ReportPage() {
               </div>
 
               {/* Category & Date Grid */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-slate-300 mb-1">
                     Category (Strict Match)
@@ -282,14 +289,11 @@ export function ReportPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">
-                    Date of Incident
-                  </label>
-                  <input
+                  <CalendarDatePicker
                     name="date"
-                    type="date"
-                    defaultValue="2026-04-14"
-                    className="w-full rounded-lg border border-slate-700 bg-slate-950/70 px-3 py-2 text-xs text-white focus:border-[#f0d060] focus:outline-none"
+                    value={incidentDate}
+                    onChange={setIncidentDate}
+                    label={reportKind === 'lost' ? 'Date Lost (Incident Log)' : 'Date Found (Discovery Log)'}
                   />
                 </div>
               </div>
