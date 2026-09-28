@@ -28,7 +28,7 @@ export function FaqPage() {
 
   return (
     <div className="relative min-h-screen">
-      <GrandLineMap selectedId="water-7" onSelect={() => undefined} />
+      <GrandLineMap variant="background" selectedId="water-7" onSelect={() => undefined} />
       <div className="relative z-20">
         <Navbar onAuthClick={() => setAuthOpen(true)} />
         <div className="glass-panel mx-4 mb-10 max-w-3xl rounded-2xl p-6 md:mx-8">

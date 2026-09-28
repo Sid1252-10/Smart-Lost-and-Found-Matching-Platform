@@ -31,7 +31,7 @@ export function Hero({ onBrowseClick, onReportClick }: HeroProps) {
   return (
     <section className="relative w-full bg-[#050b14] overflow-hidden">
       {/* Background container maintaining landscape aspect ratio of the hero artwork */}
-      <div className="relative mx-auto max-w-[1440px] aspect-[682/340] w-full max-h-[700px] overflow-hidden shadow-2xl">
+      <div className="relative mx-auto max-w-[1440px] aspect-[1376/768] w-full max-h-[700px] overflow-hidden shadow-2xl">
         {/* Exact Hero Artwork */}
         <img
           src="/extracted/hero_bg.jpg"
@@ -46,10 +46,10 @@ export function Hero({ onBrowseClick, onReportClick }: HeroProps) {
         <div
           style={{
             position: 'absolute',
-            left: '9.5%',
-            top: '47.5%',
-            width: '34.5%',
-            height: '11.5%',
+            left: '5.2%',
+            top: '53%',
+            width: '34%',
+            height: '7.5%',
           }}
           className="group cursor-pointer"
           onClick={handleBtn1}
@@ -76,10 +76,10 @@ export function Hero({ onBrowseClick, onReportClick }: HeroProps) {
         <div
           style={{
             position: 'absolute',
-            left: '9.5%',
-            top: '61.0%',
-            width: '34.5%',
-            height: '11.5%',
+            left: '5.2%',
+            top: '66%',
+            width: '34%',
+            height: '7.5%',
           }}
           className="group cursor-pointer"
           onClick={handleBtn2}

@@ -116,6 +116,16 @@ export const MAP_INCIDENTS: IslandIncident[] = [
     ruler: 'World Government Justice Department',
   },
   {
+    id: 'marineford',
+    name: 'Marineford',
+    xPercent: 83.5,
+    yPercent: 62.0,
+    lore: 'The crescent-shaped Marine Headquarters fortress island presiding over Paradise. Site of the Summit War of the Paramount.',
+    itemsLogged: 142,
+    keyIncidents: 'Summit War; Whitebeard and Ace fallen; declaration of the New Era.',
+    ruler: 'Marine High Command / World Government',
+  },
+  {
     id: 'thriller_bark',
     name: 'Thriller Bark',
     xPercent: 67.5,
