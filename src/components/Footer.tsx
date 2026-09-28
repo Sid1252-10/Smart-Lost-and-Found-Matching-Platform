@@ -13,7 +13,8 @@ export function Footer({ onWorldClick }: FooterProps) {
         <img
           src="/extracted/footer_bg.jpg"
           alt="Treasury Footer Nautical Chart"
-          className="h-full w-full object-cover object-center pointer-events-none"
+          className="h-full w-full object-cover pointer-events-none"
+          style={{ objectPosition: '20% center' }}
         />
 
         {/* Interactive Clickable Hotspots overlay matching the text in the image */}

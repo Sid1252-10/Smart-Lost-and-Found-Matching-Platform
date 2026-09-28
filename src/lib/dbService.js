@@ -21,8 +21,8 @@ export const supabase = isSupabaseConfigured
   ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
   : null;
 
-const LOCAL_STORAGE_KEY_REPORTS = "nexasoul_sabaody_reports_v3";
-const LOCAL_STORAGE_KEY_CLAIMS = "nexasoul_sabaody_claims_v3";
+const LOCAL_STORAGE_KEY_REPORTS = "nexasoul_sabaody_reports_v4";
+const LOCAL_STORAGE_KEY_CLAIMS = "nexasoul_sabaody_claims_v4";
 
 /**
  * Normalizes an item to have both kind ('lost'|'found') and type ('LOST'|'FOUND')

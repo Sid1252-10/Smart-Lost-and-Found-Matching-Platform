@@ -111,7 +111,6 @@ export function TreasureGroves({ onSelectGrove }: TreasureGrovesProps) {
         {/* 6 Grove Cards in Landscape Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4 justify-items-center font-body">
           {GROVES.map((grove) => {
-            const actualCount = getGroveActualItems(grove.id, grove.name).length
             return (
               <div
                 key={grove.id}
@@ -131,10 +130,6 @@ export function TreasureGroves({ onSelectGrove }: TreasureGrovesProps) {
                     className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                     loading="lazy"
                   />
-                  {/* Live real-time registry count badge */}
-                  <div className="absolute bottom-2 right-2 rounded bg-black/80 px-1.5 py-0.5 border border-[#d4a843]/50 text-[10px] font-bold text-[#f0d060]">
-                    {actualCount} {actualCount === 1 ? 'item' : 'items'}
-                  </div>
                 </div>
 
                 {/* Hover Highlight Ring */}
