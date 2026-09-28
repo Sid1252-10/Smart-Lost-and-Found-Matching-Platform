@@ -165,6 +165,9 @@ export function rankAllMatches(lostList, foundList, minScore = 35) {
 
   for (const lost of lostList) {
     for (const found of foundList) {
+      // Must be same category: comparing across different categories is irrelevant
+      if (lost.category !== found.category) continue;
+
       const match = computeMatchScore(lost, found);
       if (match.score >= minScore) {
         results.push(match);
@@ -174,3 +177,112 @@ export function rankAllMatches(lostList, foundList, minScore = 35) {
 
   return results.sort((a, b) => b.score - a.score);
 }
+
+/**
+ * Compare any two specific reports regardless of their type (lost/found).
+ * Useful when a user wants to manually check if two reports might be the same item.
+ *
+ * @param {Object} reportA - Any report object
+ * @param {Object} reportB - Any report object
+ * @returns {Object} matchResult with the same shape as computeMatchScore
+ */
+export function compareAnyTwo(reportA, reportB) {
+  // Enforce: one must be LOST and one must be FOUND
+  if (reportA.type === reportB.type) {
+    return {
+      matchId: `CMP-${reportA.id}-${reportB.id}`,
+      reportA,
+      reportB,
+      score: 0,
+      confidenceTier: "LOW",
+      sameType: true,
+      matchBadges: [
+        "Cannot match: both reports are " + reportA.type + ". Select one LOST and one FOUND report.",
+      ],
+      breakdown: { categoryScore: 0, locationScore: 0, timeScore: 0, keywordScore: 0, totalScore: 0 },
+      error: true,
+    };
+  }
+
+  // Enforce: Category must match
+  if (reportA.category !== reportB.category) {
+    return {
+      matchId: `CMP-${reportA.id}-${reportB.id}`,
+      reportA,
+      reportB,
+      score: 0,
+      confidenceTier: "LOW",
+      sameType: false,
+      matchBadges: [
+        `Category mismatch: "${reportA.category}" vs "${reportB.category}". Cannot match items of different categories.`,
+      ],
+      breakdown: { categoryScore: 0, locationScore: 0, timeScore: 0, keywordScore: 0, totalScore: 0 },
+      error: true,
+    };
+  }
+
+  const cat = scoreCategory(reportA, reportB);
+  const loc = scoreLocation(reportA, reportB);
+  const time = scoreTime(reportA, reportB);
+  const kw = scoreKeywords(reportA, reportB);
+
+  const totalScore = Math.min(100, cat.score + loc.score + time.score + kw.score);
+
+  let confidenceTier = "LOW";
+  if (totalScore >= 85) confidenceTier = "LEGENDARY";
+  else if (totalScore >= 70) confidenceTier = "HIGH";
+  else if (totalScore >= 50) confidenceTier = "MODERATE";
+
+  return {
+    matchId: `CMP-${reportA.id}-${reportB.id}`,
+    reportA,
+    reportB,
+    score: totalScore,
+    confidenceTier,
+    sameType: false,
+    matchBadges: [cat.badge, loc.badge, time.badge, kw.badge],
+    breakdown: {
+      categoryScore: cat.score,
+      locationScore: loc.score,
+      timeScore: time.score,
+      keywordScore: kw.score,
+      totalScore,
+    },
+  };
+}
+
+/**
+ * Find the best matches for a single report from a list of all reports.
+ * Only compares against reports of the opposite type in the EXACT SAME CATEGORY.
+ *
+ * @param {Object} targetReport - The report to find matches for
+ * @param {Array} allReports - All available reports
+ * @param {number} [minScore=35] - Minimum score threshold
+ * @param {number} [limit=10] - Max number of results
+ * @returns {Array} sorted match results
+ */
+export function findBestMatchesForReport(targetReport, allReports, minScore = 35, limit = 10) {
+  const oppositeType = targetReport.type === "LOST" ? "FOUND" : "LOST";
+  // Filter by opposite type AND exact same category
+  const candidates = allReports.filter(
+    (r) =>
+      r.type === oppositeType &&
+      r.status !== "RECOVERED" &&
+      r.id !== targetReport.id &&
+      r.category === targetReport.category
+  );
+
+  const results = [];
+  for (const candidate of candidates) {
+    const match = computeMatchScore(
+      targetReport.type === "LOST" ? targetReport : candidate,
+      targetReport.type === "FOUND" ? targetReport : candidate
+    );
+    if (match.score >= minScore) {
+      results.push(match);
+    }
+  }
+
+  return results.sort((a, b) => b.score - a.score).slice(0, limit);
+}
+

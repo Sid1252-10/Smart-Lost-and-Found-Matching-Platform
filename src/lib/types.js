@@ -64,6 +64,36 @@ export const RELIC_CATEGORIES = [
     icon: "gem",
     lore: "Devil Fruit replicas, Poneglyph rubbings, ancient Shandian dials, and Sea King scales.",
   },
+  {
+    id: "clothing-accessories",
+    label: "Clothing & Accessories",
+    icon: "shirt",
+    lore: "Captain coats, Marine capes, Kuja robes, Germa raid suits, and Straw Hat crew outfits.",
+  },
+  {
+    id: "medical-supplies",
+    label: "Medical & Supplies",
+    icon: "heart-pulse",
+    lore: "Chopper's medical kits, Rumble Balls, healing herbs from Drum Island, and antidotes.",
+  },
+  {
+    id: "musical-instruments",
+    label: "Musical Instruments",
+    icon: "music",
+    lore: "Brook's violin, Bink's Sake song sheets, Tone Dials, and crew celebration drums.",
+  },
+  {
+    id: "documents-maps",
+    label: "Documents & Maps",
+    icon: "map",
+    lore: "Grand Line sea charts, bounty posters, Marine intelligence files, and crew logbooks.",
+  },
+  {
+    id: "food-provisions",
+    label: "Food & Provisions",
+    icon: "utensils",
+    lore: "Sanji's lunch boxes, All Blue fish catches, Sea King meat cuts, and Baratie specials.",
+  },
 ];
 
 /**
