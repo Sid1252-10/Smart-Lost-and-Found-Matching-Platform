@@ -82,6 +82,7 @@ export function ClaimingPage() {
 
   return (
     <div className="relative min-h-screen text-[#e2e8f0] flex flex-col font-body">
+      {/* Main Claiming Portal */}
       <Navbar />
 
       <main className="flex-1 mx-auto max-w-[1000px] w-full px-4 py-8 md:px-8">
