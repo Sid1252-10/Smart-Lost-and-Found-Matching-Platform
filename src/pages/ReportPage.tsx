@@ -181,30 +181,30 @@ export function ReportPage() {
         {/* Two-Column Layout: World Map + Report Form */}
         <div className="grid gap-8 lg:grid-cols-12 items-start font-body">
           {/* Left Column: Interactive Grand Line World Map */}
-          <div className="lg:col-span-7 flex flex-col gap-4">
-            <div className="rounded-xl border border-[#d4a843]/20 bg-[#0d1524] p-3 text-xs text-slate-300 flex items-center justify-between">
+          <div className="lg:col-span-5 flex flex-col gap-4">
+            <div className="rounded-xl border border-[#d4a843]/20 bg-[#0d1524]/70 backdrop-blur-sm p-3 text-xs text-slate-300 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <MapPin className="h-4 w-4 text-[#f0d060]" />
-                <span>
-                  Click an island marker on the map to set the dispatch location:
-                </span>
+                <span>Click an island marker to set location:</span>
               </div>
               <span className="font-bold text-[#f0d060] bg-black/50 px-2 py-0.5 rounded border border-[#d4a843]/30">
                 {selectedIsland?.name || 'Select Island'}
               </span>
             </div>
 
-            {/* The World Map */}
-            <GrandLineMap
-              selectedId={locationId}
-              onSelect={setLocationId}
-              title="GRAND LINE: PARADISE SECTION SURVEY"
-              subtitle="Click any island pin to lock coordinates into your report"
-            />
+            {/* The World Map — capped height so it doesn't overflow */}
+            <div className="overflow-hidden rounded-xl" style={{ maxHeight: '420px' }}>
+              <GrandLineMap
+                selectedId={locationId}
+                onSelect={setLocationId}
+                title="GRAND LINE: PARADISE SECTION SURVEY"
+                subtitle="Click any island pin to lock coordinates into your report"
+              />
+            </div>
           </div>
 
           {/* Right Column: Dispatch Report Form */}
-          <div className="lg:col-span-5">
+          <div className="lg:col-span-7">
             <form
               onSubmit={onSubmit}
               className="rounded-2xl border-2 border-[#d4a843]/40 bg-gradient-to-b from-[#0e1728] to-[#070e1b] p-6 shadow-2xl space-y-4"

@@ -14,6 +14,7 @@ export const SEED_ITEMS: RegistryItem[] = [
     description: 'Distinctive, jeweled sword guard found near the battlefield.',
     dateFound: '2026-04-12',
     claimedBy: 'Dracule Mihawk',
+    imageUrl: '/items/wado_ichimonji.jpg',
   },
   {
     id: 'gem-2',
@@ -27,6 +28,7 @@ export const SEED_ITEMS: RegistryItem[] = [
     uniqueMarks: 'Crew Jolly Roger',
     description: 'Classic red and wooden slingshot found in the dockyards.',
     dateFound: '2026-04-11',
+    imageUrl: '/items/straw_hat.jpg',
   },
   {
     id: 'gem-3',
@@ -40,6 +42,7 @@ export const SEED_ITEMS: RegistryItem[] = [
     uniqueMarks: 'Burn Marks',
     description: 'Black fabric bandana found near the research facility.',
     dateFound: '2026-04-09',
+    imageUrl: '/items/kikoku.jpg',
   },
   {
     id: 'gem-4',
@@ -53,6 +56,7 @@ export const SEED_ITEMS: RegistryItem[] = [
     uniqueMarks: 'Straw Weave',
     description: 'Small, woven piece of straw hat material found near execution platform.',
     dateLost: '2026-04-08',
+    imageUrl: '/items/straw_hat.jpg',
   },
   {
     id: 'bag-lost-1',
@@ -92,6 +96,7 @@ export const SEED_ITEMS: RegistryItem[] = [
     uniqueMarks: 'Log Pose Dial',
     description: 'Gold-cased Log Pose last seen near the shipwright docks of Water 7.',
     dateLost: '2026-04-07',
+    imageUrl: '/items/log_pose.jpg',
   },
   {
     id: 'logpose-found',
@@ -105,6 +110,7 @@ export const SEED_ITEMS: RegistryItem[] = [
     uniqueMarks: 'Log Pose Dial',
     description: 'Golden navigation dial found by a Galley-La apprentice on Dock 1.',
     dateFound: '2026-04-13',
+    imageUrl: '/items/log_pose.jpg',
   },
   {
     id: 'necklace-found',
@@ -118,6 +124,7 @@ export const SEED_ITEMS: RegistryItem[] = [
     uniqueMarks: 'Engraved Name',
     description: 'Silver pendant with ancient script, discovered among mangrove bubbles.',
     dateFound: '2026-04-14',
+    imageUrl: '/items/poneglyph_scroll.jpg',
   },
   {
     id: 'wano-sword-lost',
@@ -131,6 +138,7 @@ export const SEED_ITEMS: RegistryItem[] = [
     uniqueMarks: 'Engraved Name',
     description: 'Cursed blade fragment lost during a Flower Capital festival.',
     dateLost: '2026-04-06',
+    imageUrl: '/items/kikoku.jpg',
   },
   {
     id: 'wano-sword-found',
@@ -144,6 +152,7 @@ export const SEED_ITEMS: RegistryItem[] = [
     uniqueMarks: 'Engraved Name',
     description: 'Black metal shard with a name engraved, found beneath cherry blossoms.',
     dateFound: '2026-04-16',
+    imageUrl: '/items/kikoku.jpg',
   },
   {
     id: 'hat-found',
@@ -157,5 +166,6 @@ export const SEED_ITEMS: RegistryItem[] = [
     uniqueMarks: 'Red Ribbon',
     description: 'Woven straw brim with a red ribbon, recovered near the execution platform.',
     dateFound: '2026-04-09',
+    imageUrl: '/items/straw_hat.jpg',
   },
 ]

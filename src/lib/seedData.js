@@ -33,7 +33,7 @@ export const SEED_REPORTS = [
     incidentDate: "2026-09-28",
     description:
       "Pure white circular tsuba (guard), pristine white rayskin hilt wrap, plain polished white scabbard. Kuina's keepsake blade. Extremely sharp. I took a wrong turn after visiting a tavern and realized it was missing.",
-    imageUrl: "",
+    imageUrl: "/items/wado_ichimonji.jpg",
     secretProofQuestion: "What is the hamon (temper line) pattern along the blade steel?",
     secretProofAnswer: "straight temper line suguha",
     status: REPORT_STATUS.ACTIVE,
@@ -52,7 +52,7 @@ export const SEED_REPORTS = [
     incidentDate: "2026-09-27",
     description:
       "Hand-woven yellow straw hat featuring a wide red cloth band. Entrusted to me by Red-Haired Shanks at Windmill Village. Blown off my head while chasing a flying fish cart near the bar.",
-    imageUrl: "",
+    imageUrl: "/items/straw_hat.jpg",
     secretProofQuestion: "Whose Vivre Card piece is hidden inside the inner lining?",
     secretProofAnswer: "portgas d ace",
     status: REPORT_STATUS.ACTIVE,
@@ -71,7 +71,7 @@ export const SEED_REPORTS = [
     incidentDate: "2026-09-28",
     description:
       "Unusually long black scabbard decorated with white cross motifs along its entire length. Guard is wrapped in dense black fur with red knot tie. Emits a heavy demonic aura. Was ambushed and lost it in the chaos.",
-    imageUrl: "",
+    imageUrl: "/items/kikoku.jpg",
     secretProofQuestion: "What fur material cushions the katana tsuba guard?",
     secretProofAnswer: "black leopard fur",
     status: REPORT_STATUS.ACTIVE,
@@ -90,7 +90,7 @@ export const SEED_REPORTS = [
     incidentDate: "2026-09-26",
     description:
       "Brass wrist-mounted navigational gauge with three independent magnetic floating needle spheres. Calibrated for New World magnetic currents. Dropped while haggling at the compass bazaar.",
-    imageUrl: "",
+    imageUrl: "/items/log_pose.jpg",
     secretProofQuestion: "What symbol is engraved onto the wrist buckle clasp?",
     secretProofAnswer: "pinwheel and tangerine",
     status: REPORT_STATUS.ACTIVE,
@@ -109,7 +109,7 @@ export const SEED_REPORTS = [
     incidentDate: "2026-09-27",
     description:
       "Rolled parchment scroll containing charcoal rubbings of an ancient Poneglyph. The script is in the ancient language, readable only by scholars of Ohara. Has a wax seal with the Kozuki crest.",
-    imageUrl: "",
+    imageUrl: "/items/poneglyph_scroll.jpg",
     secretProofQuestion: "What crest is on the wax seal?",
     secretProofAnswer: "kozuki",
     status: REPORT_STATUS.ACTIVE,
@@ -128,7 +128,7 @@ export const SEED_REPORTS = [
     incidentDate: "2026-09-28",
     description:
       "Leather-bound cooking journal with gold embossed Baratie logo. Contains 200+ original recipes, All Blue fish species notes, and sketches of legendary ingredients from every sea.",
-    imageUrl: "",
+    imageUrl: "/items/recipe_journal.jpg",
     secretProofQuestion: "What is the name of the restaurant on the journal cover?",
     secretProofAnswer: "baratie",
     status: REPORT_STATUS.ACTIVE,
@@ -150,7 +150,7 @@ export const SEED_REPORTS = [
     incidentDate: "2026-09-28",
     description:
       "Found leaning against an ale cask at Pier 2 tavern. Master craftsman white rayskin wrap, circular guard, plain white lacquered scabbard. Looks like one of the 21 Great O Wazamono grade swords!",
-    imageUrl: "",
+    imageUrl: "/items/wado_ichimonji.jpg",
     status: REPORT_STATUS.ACTIVE,
     createdAt: new Date("2026-09-28T10:10:00Z").toISOString(),
   },
@@ -167,7 +167,7 @@ export const SEED_REPORTS = [
     incidentDate: "2026-09-27",
     description:
       "Found caught in the mangrove vines near the roof. Yellow woven straw with stitched brim repairs and a signature bright red cotton band. Seems very precious to someone.",
-    imageUrl: "",
+    imageUrl: "/items/straw_hat.jpg",
     status: REPORT_STATUS.ACTIVE,
     createdAt: new Date("2026-09-27T15:00:00Z").toISOString(),
   },
@@ -184,7 +184,7 @@ export const SEED_REPORTS = [
     incidentDate: "2026-09-28",
     description:
       "Massive two-handed sword longer than a normal man. Black lacquered saya with white plus-sign cross emblems. Guard has thick velvety black fur. Found abandoned in a fight scene.",
-    imageUrl: "",
+    imageUrl: "/items/kikoku.jpg",
     status: REPORT_STATUS.ACTIVE,
     createdAt: new Date("2026-09-28T09:00:00Z").toISOString(),
   },
@@ -201,7 +201,7 @@ export const SEED_REPORTS = [
     incidentDate: "2026-09-26",
     description:
       "Found dropped near the compass booth. Solid polished brass frame with three floating magnetic orbs pointing toward mysterious Grand Line wave currents. Wrist-mounted style.",
-    imageUrl: "",
+    imageUrl: "/items/log_pose.jpg",
     status: REPORT_STATUS.ACTIVE,
     createdAt: new Date("2026-09-26T18:20:00Z").toISOString(),
   },
@@ -218,7 +218,7 @@ export const SEED_REPORTS = [
     incidentDate: "2026-09-27",
     description:
       "Rolled parchment found behind resin barrels. Covered in charcoal rubbings of carved stone text in a language nobody can read. Has a distinctive family crest wax seal.",
-    imageUrl: "",
+    imageUrl: "/items/poneglyph_scroll.jpg",
     status: REPORT_STATUS.ACTIVE,
     createdAt: new Date("2026-09-27T13:30:00Z").toISOString(),
   },
@@ -235,7 +235,7 @@ export const SEED_REPORTS = [
     incidentDate: "2026-09-28",
     description:
       "Leather journal left at the counter. Has a restaurant logo in gold on the cover. Contains hundreds of handwritten recipes with detailed fish anatomy sketches and flavor notes.",
-    imageUrl: "",
+    imageUrl: "/items/recipe_journal.jpg",
     status: REPORT_STATUS.ACTIVE,
     createdAt: new Date("2026-09-28T08:30:00Z").toISOString(),
   },
