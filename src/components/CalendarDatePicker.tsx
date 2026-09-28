@@ -71,15 +71,6 @@ export function CalendarDatePicker({
   const [viewYear, setViewYear] = useState<number>(parsedCurrent.getFullYear())
   const [viewMonth, setViewMonth] = useState<number>(parsedCurrent.getMonth())
 
-  useEffect(() => {
-    if (value !== undefined) {
-      setInternalDate(value)
-      const p = parseYYYYMMDD(value)
-      setViewYear(p.getFullYear())
-      setViewMonth(p.getMonth())
-    }
-  }, [value])
-
   // Click outside listener to close popup
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {

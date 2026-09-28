@@ -331,8 +331,9 @@ export function ReportPage() {
 
               {/* Photo Upload */}
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  Optional Treasure Photo
+                <label className="block text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1.5">
+                  <ImageIcon className="h-3.5 w-3.5 text-[#f0d060]" />
+                  <span>Optional Treasure Photo</span>
                 </label>
                 <div className="flex items-center gap-3">
                   <input
